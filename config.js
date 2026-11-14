@@ -10,6 +10,8 @@ window.TRIP_CONFIG = {
   playlistUrl: '',
   // Google Photos shared album link, for after the trip.
   photosUrl: '',
+  // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
+  cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.
   passcodeHash: '30ntcz'
 };
