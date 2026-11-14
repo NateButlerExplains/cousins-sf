@@ -11,7 +11,14 @@
 <meta property="og:image" content="https://natebutlerexplains.github.io/cousins-sf/img/share.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120B27'/%3E%3Cpath d='M14 48V22M50 48V22M14 24c8 16 28 16 36 0M8 40h48' stroke='%23FFC857' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cousins SF">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <style>
   @font-face { font-family: Anton; src: url(fonts/anton-latin-400-normal.woff2) format('woff2'); font-display: swap; }
   @font-face { font-family: Bebas; src: url(fonts/bebas-neue-latin-400-normal.woff2) format('woff2'); font-display: swap; }
@@ -19,137 +26,270 @@
   @font-face { font-family: DM; font-weight: 500; src: url(fonts/dm-sans-latin-500-normal.woff2) format('woff2'); font-display: swap; }
   @font-face { font-family: DM; font-weight: 700; src: url(fonts/dm-sans-latin-700-normal.woff2) format('woff2'); font-display: swap; }
 
-  :root { --night: #120B27; --gold: #FFC857; --coral: #FF8A66; --mute: #DCCFEE; }
+  :root { --night: #120B27; --gold: #FFC857; --coral: #FF8A66; --teal: #6FE0D2; --mute: #DCCFEE; --W: min(100vw, 80vh); }
+  @supports (height: 1dvh) { :root { --W: min(100vw, 80dvh); } }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--night); overflow: hidden; -webkit-tap-highlight-color: transparent; }
   body { font-family: DM, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+  button { font-family: inherit; }
 
   .track { position: fixed; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden;
            scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; }
   .track::-webkit-scrollbar { display: none; }
-
   .slide { position: relative; flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: center; scroll-snap-stop: always;
            display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 1600px; }
   .slide .blur { position: absolute; inset: -40px; background-size: cover; background-position: center;
                  filter: blur(28px) brightness(.55) saturate(1.2); transform: scale(1.1); }
 
-  /* the 4:5 page, sized to fit any screen */
-  .card { position: relative; width: min(100vw, 80vh); width: min(100vw, 80dvh); aspect-ratio: 4 / 5;
-          transform-style: preserve-3d; transition: transform .7s cubic-bezier(.2,.7,.2,1); cursor: pointer; }
+  .card { position: relative; width: var(--W); aspect-ratio: 4 / 5; transform-style: preserve-3d;
+          transition: transform .7s cubic-bezier(.2,.7,.2,1); cursor: pointer; }
   .card.flipped { transform: rotateY(180deg); }
-  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0,0,0,.5); }
-  .face img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none;
-              transform: scale(1.0); transition: transform 7s ease-out; }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .face img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; transition: transform 7s ease-out; }
   .slide.here .face img { transform: scale(1.06); }
-  .back { transform: rotateY(180deg); background: var(--night); display: flex; flex-direction: column; justify-content: center;
-          padding: 9% 9%; gap: 4.5%; }
-  .back .bgimg { position: absolute; inset: -30px; background-size: cover; background-position: center; filter: blur(22px) brightness(.32) saturate(1.3); }
+  .back { transform: rotateY(180deg); background: var(--night); display: flex; flex-direction: column; justify-content: center; padding: 9%; gap: 4.5%; }
+  .bgimg { position: absolute; inset: -30px; background-size: cover; background-position: center; filter: blur(22px) brightness(.32) saturate(1.3); }
   .back > *:not(.bgimg) { position: relative; }
-  .back .when { font: 700 min(3.4vw, 2.7vh)/1 DM; letter-spacing: .35em; color: var(--gold); text-transform: uppercase; }
-  .back .what { font: 400 min(13vw, 10.4vh)/.92 Bebas; letter-spacing: .02em; color: #fff; text-transform: uppercase; margin-top: -1%; }
+  .back .when { font: 700 calc(var(--W) * .034)/1 DM; letter-spacing: .35em; color: var(--gold); text-transform: uppercase; }
+  .back .what { font: 400 calc(var(--W) * .13)/.92 Bebas; color: #fff; text-transform: uppercase; }
   .back .row { display: grid; grid-template-columns: 26% 1fr; gap: 3%; align-items: baseline; padding-top: 4%; border-top: 1.5px solid rgba(255,200,87,.35); }
-  .back .k { font: 400 min(6vw, 4.8vh)/1 Bebas; letter-spacing: .06em; color: var(--gold); }
-  .back .v { font: 500 min(4.2vw, 3.35vh)/1.32 DM; color: #fff; }
-  .back .close { font: 700 min(3vw, 2.4vh)/1 DM; letter-spacing: .25em; color: var(--mute); text-transform: uppercase; margin-top: 2%; }
+  .back .k { font: 400 calc(var(--W) * .06)/1 Bebas; letter-spacing: .06em; color: var(--gold); }
+  .back .v { font: 500 calc(var(--W) * .042)/1.32 DM; color: #fff; }
+  .back .close { font: 700 calc(var(--W) * .03)/1 DM; letter-spacing: .25em; color: var(--mute); text-transform: uppercase; margin-top: 2%; }
+  .today-chip { position: absolute; top: 3%; right: 3%; z-index: 3; background: var(--coral); color: var(--night); font: 400 calc(var(--W) * .055)/1 Bebas;
+                letter-spacing: .08em; padding: 1.4% 3% .8%; transform: rotate(4deg); box-shadow: 0 8px 20px rgba(0,0,0,.4); display: none; }
+  .slide.is-today .today-chip { display: block; }
 
-  /* countdown */
-  .count { position: relative; width: min(100vw, 80vh); width: min(100vw, 80dvh); aspect-ratio: 4/5; display: flex; flex-direction: column;
-           align-items: center; justify-content: center; text-align: center; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
-  .count .bgimg { position: absolute; inset: 0; background: url(img/bridge.jpg) center 60% / cover; transform: scale(1.04); }
-  .count .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,6,30,.88) 0%, rgba(10,6,30,.55) 45%, rgba(10,6,30,.85) 100%); }
-  .count > div:not(.bgimg):not(.shade) { position: relative; }
-  .count .k1 { font: 700 min(3.6vw, 2.9vh)/1 DM; letter-spacing: .4em; color: #fff; }
-  .count .script { font: 400 min(12vw, 9.6vh)/1 Yellowtail; color: var(--gold); transform: rotate(-4deg); margin-top: 3%; margin-bottom: 3%; text-shadow: 0 6px 24px rgba(0,0,0,.6); }
-  .count .num { font: 400 min(44vw, 35vh)/.86 Anton; color: #fff; margin-top: 2%; text-shadow: 0 10px 50px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
-  .count .days { font: 400 min(13vw, 10.4vh)/1 Bebas; letter-spacing: .12em; color: var(--gold); margin-top: 1%; }
-  .count .clock { display: flex; gap: min(5vw, 4vh); margin-top: 5%; }
-  .count .clock div { display: flex; flex-direction: column; align-items: center; }
-  .count .clock b { font: 400 min(10vw, 8vh)/1 Bebas; color: #fff; font-variant-numeric: tabular-nums; min-width: 2ch; }
-  .count .clock span { font: 700 min(2.6vw, 2.1vh)/1 DM; letter-spacing: .3em; color: var(--mute); margin-top: 6px; }
-  .count .date { font: 400 min(7vw, 5.6vh)/1 Bebas; letter-spacing: .14em; color: #fff; margin-top: 7%; padding: 2% 5% 1.2%; background: var(--gold); color: var(--night); }
+  .panel { position: relative; width: var(--W); aspect-ratio: 4/5; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+           display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 7% 7% 9%; }
+  .panel > .pbg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .panel > .pshade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,6,30,.9) 0%, rgba(10,6,30,.66) 45%, rgba(10,6,30,.92) 100%); }
+  .panel > *:not(.pbg):not(.pshade) { position: relative; }
+  .kick { font: 700 calc(var(--W) * .033)/1 DM; letter-spacing: .4em; color: #fff; }
+  .script { font: 400 calc(var(--W) * .11)/1 Yellowtail; color: var(--gold); transform: rotate(-4deg); margin: 2% 0 1%; text-shadow: 0 6px 24px rgba(0,0,0,.6); }
+  .huge { font: 400 calc(var(--W) * .19)/.9 Anton; color: #fff; text-transform: uppercase; text-shadow: 0 8px 40px rgba(0,0,0,.5); }
+  .sub { font: 500 calc(var(--W) * .04)/1.35 DM; color: var(--mute); margin-top: 3%; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; min-height: 44px; padding: .4em 1.1em .25em; border: 0; border-radius: 999px;
+         background: var(--gold); color: var(--night); font: 400 calc(var(--W) * .052)/1 Bebas; letter-spacing: .08em; text-decoration: none; cursor: pointer;
+         box-shadow: 0 10px 26px rgba(0,0,0,.35); }
+  .btn.ghost { background: rgba(255,255,255,.12); color: #fff; border: 1.5px solid rgba(255,255,255,.35); box-shadow: none; }
+  .btn[aria-disabled="true"] { opacity: .55; cursor: default; }
+  .btn:focus-visible, .choice:focus-visible, .field:focus-visible, .ibtn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 10px 3%; justify-content: center; margin-top: 4%; width: 100%; }
+  .note { font: 500 calc(var(--W) * .032)/1.35 DM; color: var(--mute); margin-top: 3%; min-height: 1.4em; }
 
-  .dots { position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 7px; z-index: 5; pointer-events: none; }
-  .dots button { pointer-events: auto; width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.4);
-                 cursor: pointer; transition: width .25s, background .25s; }
-  .dots button.on { width: 24px; border-radius: 6px; background: var(--gold); }
-  .dots button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .num { font: 400 calc(var(--W) * .36)/.86 Anton; color: #fff; text-shadow: 0 10px 50px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+  .days { font: 400 calc(var(--W) * .11)/1 Bebas; letter-spacing: .12em; color: var(--gold); }
+  .clock { display: flex; gap: 6%; margin-top: 1%; justify-content: center; width: 100%; }
+  .clock div { display: flex; flex-direction: column; align-items: center; }
+  .clock b { font: 400 calc(var(--W) * .08)/1 Bebas; color: #fff; font-variant-numeric: tabular-nums; }
+  .clock span { font: 700 calc(var(--W) * .024)/1 DM; letter-spacing: .3em; color: var(--mute); margin-top: 4px; }
+  .wx { margin-top: 4%; display: flex; align-items: center; gap: 4%; padding: 2.2% 5%; border-radius: 18px; background: rgba(18,11,39,.6);
+        border: 1.5px solid rgba(111,224,210,.45); font: 500 calc(var(--W) * .034)/1.3 DM; color: #fff; text-align: left; }
+  .wx b { font: 400 calc(var(--W) * .085)/1 Bebas; color: var(--teal); white-space: nowrap; }
+  .wxdays { display: flex; gap: 3%; margin-top: 3%; width: 100%; justify-content: center; }
+  .wxdays div { flex: 1; max-width: 22%; padding: 2% 1%; border-radius: 14px; background: rgba(18,11,39,.6); border: 1.5px solid rgba(111,224,210,.35); }
+  .wxdays i { display: block; font: 700 calc(var(--W) * .028)/1 DM; font-style: normal; letter-spacing: .2em; color: var(--mute); }
+  .wxdays b { display: block; font: 400 calc(var(--W) * .06)/1.1 Bebas; color: #fff; }
+  .wxdays span { display: block; font: 500 calc(var(--W) * .026)/1.2 DM; color: var(--teal); }
 
-  .nav { position: fixed; top: 50%; transform: translateY(-50%); z-index: 5; width: 52px; height: 52px; border-radius: 50%;
-         border: 0; background: rgba(18,11,39,.55); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; display: none; backdrop-filter: blur(6px); }
-  .nav.prev { left: 18px; } .nav.next { right: 18px; }
-  .nav:disabled { opacity: 0; pointer-events: none; }
+  .panel.mappanel { padding: 5% 0 0; justify-content: flex-start; background: var(--night); }
+  .mappanel .mhead { padding: 0 6%; }
+  .mappanel .huge { font-size: calc(var(--W) * .15); }
+  #map { width: 100%; flex: 1; margin-top: 3%; background: #e8e4dc; touch-action: none; }
+  .pin { width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: var(--night); display: flex; align-items: center; justify-content: center;
+         font: 700 14px/1 DM; border: 2px solid #120B27; box-shadow: 0 4px 12px rgba(0,0,0,.45); }
+  .pin.thu { background: var(--coral); } .pin.fri { background: var(--gold); } .pin.sat { background: var(--teal); } .pin.sun { background: #FF9FBE; }
+  .leaflet-popup-content { font: 500 14px/1.35 DM; margin: 10px 14px; color: #120B27; }
+  .leaflet-popup-content b { font: 400 22px/1.1 Bebas; letter-spacing: .04em; display: block; }
+  .leaflet-popup-content a { color: #6a2fc0; font-weight: 700; }
+  .legend { display: flex; gap: 5%; justify-content: center; padding: 2.6% 0 3.2%; font: 700 calc(var(--W) * .028)/1 DM; letter-spacing: .15em; width: 100%; background: var(--night); }
+  .legend span::before { content: ''; display: inline-block; width: .9em; height: .9em; border-radius: 50%; margin-right: .4em; vertical-align: -.1em; background: var(--c); }
+
+  .field { width: 100%; min-height: 48px; padding: 0 1em; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.35); background: rgba(18,11,39,.65);
+           color: #fff; font: 500 16px/1 DM; }
+  .field::placeholder { color: rgba(220,207,238,.7); }
+  .choices { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 2.4%; width: 100%; margin-top: 3%; }
+  .choices.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .choice { min-height: 48px; border-radius: 14px; border: 1.5px solid rgba(255,200,87,.6); background: rgba(18,11,39,.6); color: #fff; cursor: pointer;
+            font: 400 calc(var(--W) * .05)/1 Bebas; letter-spacing: .06em; padding: 3% 2% 2%; }
+  .choice.on { background: var(--gold); color: var(--night); }
+  .choice small { display: block; font: 700 calc(var(--W) * .026)/1.4 DM; letter-spacing: .1em; color: inherit; opacity: .85; margin-top: 4px; min-height: 1.4em; }
+  .qlabel { display: block; font: 400 calc(var(--W) * .058)/1 Bebas; letter-spacing: .08em; color: var(--gold); margin: 5% 0 2%; width: 100%; text-align: left; }
+
+  .topbar { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 8; display: flex; gap: 8px; }
+  .ibtn { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.3); background: rgba(18,11,39,.6); color: #fff;
+          display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(6px); }
+  .ibtn svg { width: 20px; height: 20px; }
+  .ibtn.on { background: var(--gold); color: var(--night); border-color: var(--gold); }
+  .dots { position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 6px; z-index: 5; pointer-events: none; }
+  .dots button { pointer-events: auto; width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: width .25s, background .25s; }
+  .dots button.on { width: 22px; border-radius: 6px; background: var(--gold); }
+  .nav { position: fixed; top: 50%; transform: translateY(-50%); z-index: 5; width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(18,11,39,.55);
+         color: #fff; font-size: 26px; line-height: 1; cursor: pointer; display: none; backdrop-filter: blur(6px); }
+  .nav.prev { left: 18px; } .nav.next { right: 18px; } .nav:disabled { opacity: 0; pointer-events: none; }
   @media (hover: hover) and (pointer: fine) { .nav { display: block; } }
-
-  .hint { position: fixed; left: 50%; bottom: calc(40px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5;
-          padding: 8px 16px; border-radius: 999px; background: rgba(18,11,39,.75); font: 500 14px/1.2 DM; letter-spacing: .5px; color: #fff;
-          transition: opacity .6s; pointer-events: none; white-space: nowrap; }
+  .hint { position: fixed; left: 50%; bottom: calc(40px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5; padding: 8px 16px; border-radius: 999px;
+          background: rgba(18,11,39,.78); font: 500 14px/1.2 DM; color: #fff; transition: opacity .6s; pointer-events: none; white-space: nowrap; }
   .hint.gone { opacity: 0; }
+  .toast { position: fixed; left: 50%; top: calc(70px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 9; max-width: 90vw; padding: 10px 18px; border-radius: 14px;
+           background: var(--gold); color: var(--night); font: 700 14px/1.3 DM; box-shadow: 0 10px 30px rgba(0,0,0,.4); opacity: 0; transition: opacity .3s; pointer-events: none; text-align: center; }
+  .toast.show { opacity: 1; }
+
+  .gate { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: var(--night); }
+  .gate .pbg { position: absolute; inset: 0; background: url(img/bridge.jpg) center / cover; filter: brightness(.45); transform: scale(1.03); }
+  .gate form { position: relative; width: min(88vw, 420px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+  .gate .kick { font-size: 13px; } .gate .script { font-size: 60px; } .gate .huge { font-size: 64px; }
+  .gate .sub { font-size: 16px; margin: 4px 0 0; }
+  .gate .field { text-align: center; }
+  .gate .btn { font-size: 26px; min-width: 60%; }
+  .gate .err { font: 700 14px/1.3 DM; color: var(--coral); min-height: 1.3em; }
+  .gate[hidden] { display: none; }
+
   @media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } .card { transition: none; } .face img, .slide.here .face img { transition: none; transform: none; } }
 </style>
 </head>
 <body>
+<div class="gate" id="gate" hidden>
+  <div class="pbg"></div>
+  <form id="gateForm" autocomplete="off">
+    <div class="kick">THE COUSINS PRESENT</div>
+    <div class="script">Cousins Trip</div>
+    <div class="huge">San Francisco</div>
+    <label for="gatePass" class="sub">Family only. Enter the passcode.</label>
+    <input class="field" id="gatePass" type="password" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Passcode">
+    <button class="btn" type="submit">Let me in</button>
+    <div class="err" id="gateErr" role="alert"></div>
+  </form>
+</div>
+
 <main class="track" id="track" aria-label="Cousins Trip San Francisco"></main>
+<div class="topbar">
+  <button class="ibtn" id="musicBtn" aria-label="Play music" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+  </button>
+</div>
 <button class="nav prev" id="prev" aria-label="Previous page">&#8249;</button>
 <button class="nav next" id="next" aria-label="Next page">&#8250;</button>
 <nav class="dots" id="dots" aria-label="Pages"></nav>
 <div class="hint" id="hint">Swipe for the plan &rarr; &nbsp;&middot;&nbsp; Tap a page for details</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<audio id="music" src="audio/bay-lofi.mp3" loop preload="none"></audio>
 
+<script src="config.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
 <script>
-  // Trip starts Thursday July 22, 2027, midnight San Francisco time (PDT, UTC-7)
-  const TRIP = Date.UTC(2027, 6, 22, 7, 0, 0);
+  const C = window.TRIP_CONFIG || {};
+  const SITE = 'https://natebutlerexplains.github.io/cousins-sf/';
+  const TRIP = Date.UTC(2027, 6, 22, 7, 0, 0);   // Thu July 22, 2027, midnight San Francisco time
+  const TRIP_DAYS = { '2027-07-22': 'thu', '2027-07-23': 'fri', '2027-07-24': 'sat', '2027-07-25': 'sun' };
 
+  const P = (img, day, alt, when, what, rows, map) => ({ img, day, alt, when, what, rows, map });
   const pages = [
-    { img: '01', alt: 'Cousins Trip San Francisco, July 22 to 25, 2027', when: 'The plan', what: 'Four days by the bay',
-      rows: [['When', 'Thursday, July 22 through Sunday, July 25, 2027'], ['Where', 'San Francisco, California'], ['How', 'Swipe through. Every page is one idea for the trip.']] },
-    { countdown: true },
-    { img: '02', alt: 'Thursday 4 PM: sundaes by the bay at Ghirardelli Square', when: 'Thursday · 4 PM', what: 'Sundaes by the bay',
-      rows: [['Where', 'Ghirardelli Square, on the waterfront by Fisherman’s Wharf'], ['Do', 'Hot fudge sundaes and the first group photo of the trip'], ['Then', 'A slow walk along Aquatic Park and the bay']] },
-    { img: '03', alt: 'Thursday night: welcome dinner at the wharf with the Pier 39 sea lions', when: 'Thursday · 6:30 PM', what: 'Welcome to the wharf',
-      rows: [['Dinner', 'Fog Harbor Fish House at Pier 39. Backup: The Crab House'], ['Then', 'Say hi to the sea lions lounging on the docks'], ['Vibe', 'First night, everyone together, bay views']] },
-    { img: '04', alt: 'Friday: house day, brunch, games and pizza', when: 'Friday · all day', what: 'House day',
-      rows: [['Morning', 'Sleep in, then one big group brunch'], ['Afternoon', 'Backyard and board games, pizza for lunch'], ['Tip', 'Rest up. Friday night is the big one.']] },
-    { img: '05', alt: 'Friday night: sunset dinner cruise on the bay', when: 'Friday · 6:30 – 9:30 PM', what: 'Sunset on the bay',
-      rows: [['Where', 'City Cruises, Pier 3 on the Embarcadero at Washington St'], ['Onboard', 'Dinner, a DJ, dancing, the skyline lighting up'], ['Bring', 'A jacket. The bay gets cold after sunset.']] },
-    { img: '06', alt: 'Saturday morning: Golden Gate overlook and the Palace of Fine Arts', when: 'Saturday · 9:30 AM', what: 'Golden Gate mornings',
-      rows: [['First', 'Group photos at the Golden Gate Bridge Welcome Center overlook'], ['Then', 'A walk around the Palace of Fine Arts and its lagoon'], ['Tip', 'Mornings are calmer and the light is softer']] },
-    { img: '07', alt: 'Saturday lunch: Mission burritos in Dolores Park', when: 'Saturday · 12:30 PM', what: 'Burritos in the park',
-      rows: [['Grab', 'Burritos to go from La Taqueria. Backup: El Farolito'], ['Eat', 'Picnic on the hill at Dolores Park'], ['View', 'The whole downtown skyline behind us']] },
-    { img: '08', alt: 'Saturday photo stop: the Painted Ladies at Alamo Square', when: 'Saturday · photo stop', what: 'Postcard row',
-      rows: [['Where', 'Alamo Square Park, facing the Painted Ladies'], ['Do', 'One big group photo with the skyline behind'], ['Tip', 'Bring a blanket and hang out on the lawn']] },
-    { img: '09', alt: 'Saturday afternoon: cable car ride on the Powell-Hyde line', when: 'Saturday · 2:30 PM', what: 'Ding ding! Cable car',
-      rows: [['Line', 'Powell–Hyde, up and over the hills toward the bay'], ['Board', 'At the Powell & Market turnaround, the start of the line'], ['Tip', 'Grab a spot on the outside step if there’s room']] },
-    { img: '10', alt: 'Saturday night: family-style dinner in Chinatown', when: 'Saturday · 7 PM', what: 'Family-style Chinatown',
-      rows: [['Dinner', 'China Live, one big round table. Backup: R&G Lounge'], ['Order', 'Dumplings, noodles, roast duck. Everything shared'], ['Then', 'A walk under the lanterns on Grant Avenue']] },
-    { img: '11', alt: 'Sunday morning: coffee and sourdough at the Ferry Building', when: 'Sunday · 9:30 AM', what: 'Coffee & sourdough',
-      rows: [['Where', 'Ferry Building Marketplace on the Embarcadero'], ['Eat', 'Coffee, sourdough, pastries, breakfast bites'], ['Then', 'A stroll along the water with the Bay Bridge in view']] },
-    { img: '12', alt: 'Sunday: one last look from Twin Peaks. See you in San Francisco', when: 'Sunday · 11:30 AM', what: 'One last look',
-      rows: [['Where', 'Twin Peaks, the 360° view of the whole city'], ['Tip', 'It’s windy up top. Too foggy? We skip it.'], ['Then', 'Pack up around 1 PM and head home']] }
+    P('01', null, 'Cousins Trip San Francisco, July 22 to 25, 2027', 'The plan', 'Four days by the bay',
+      [['When', 'Thursday, July 22 through Sunday, July 25, 2027'], ['Where', 'San Francisco, California'], ['How', 'Swipe through. Every page is one idea for the trip.']]),
+    { kind: 'countdown' },
+    P('02', 'thu', 'Thursday 4 PM: sundaes by the bay at Ghirardelli Square', 'Thursday · 4 PM', 'Sundaes by the bay',
+      [['Where', 'Ghirardelli Square, on the waterfront by Fisherman’s Wharf'], ['Do', 'Hot fudge sundaes and the first group photo of the trip'], ['Then', 'A slow walk along Aquatic Park and the bay']], [37.8059, -122.4229]),
+    P('03', 'thu', 'Thursday night: welcome dinner at the wharf with the Pier 39 sea lions', 'Thursday · 6:30 PM', 'Welcome to the wharf',
+      [['Dinner', 'Fog Harbor Fish House at Pier 39. Backup: The Crab House'], ['Then', 'Say hi to the sea lions lounging on the docks'], ['Vibe', 'First night, everyone together, bay views']], [37.8087, -122.4098]),
+    P('04', 'fri', 'Friday: house day, brunch, games and pizza', 'Friday · all day', 'House day',
+      [['Morning', 'Sleep in, then one big group brunch'], ['Afternoon', 'Backyard and board games, pizza for lunch'], ['Tip', 'Rest up. Friday night is the big one.']]),
+    P('05', 'fri', 'Friday night: sunset dinner cruise on the bay', 'Friday · 6:30 – 9:30 PM', 'Sunset on the bay',
+      [['Where', 'City Cruises, Pier 3 on the Embarcadero at Washington St'], ['Onboard', 'Dinner, a DJ, dancing, the skyline lighting up'], ['Bring', 'A jacket. The bay gets cold after sunset.']], [37.7986, -122.3966]),
+    P('06', 'sat', 'Saturday morning: Golden Gate overlook and the Palace of Fine Arts', 'Saturday · 9:30 AM', 'Golden Gate mornings',
+      [['First', 'Group photos at the Golden Gate Bridge Welcome Center overlook'], ['Then', 'A walk around the Palace of Fine Arts and its lagoon'], ['Tip', 'Mornings are calmer and the light is softer']], [37.8029, -122.4484]),
+    P('07', 'sat', 'Saturday lunch: Mission burritos in Dolores Park', 'Saturday · 12:30 PM', 'Burritos in the park',
+      [['Grab', 'Burritos to go from La Taqueria. Backup: El Farolito'], ['Eat', 'Picnic on the hill at Dolores Park'], ['View', 'The whole downtown skyline behind us']], [37.7596, -122.4269]),
+    P('08', 'sat', 'Saturday photo stop: the Painted Ladies at Alamo Square', 'Saturday · photo stop', 'Postcard row',
+      [['Where', 'Alamo Square Park, facing the Painted Ladies'], ['Do', 'One big group photo with the skyline behind'], ['Tip', 'Bring a blanket and hang out on the lawn']], [37.7762, -122.4346]),
+    P('09', 'sat', 'Saturday afternoon: cable car ride on the Powell-Hyde line', 'Saturday · 2:30 PM', 'Ding ding! Cable car',
+      [['Line', 'Powell–Hyde, up and over the hills toward the bay'], ['Board', 'At the Powell & Market turnaround, the start of the line'], ['Tip', 'Grab a spot on the outside step if there’s room']], [37.7849, -122.4078]),
+    P('10', 'sat', 'Saturday night: family-style dinner in Chinatown', 'Saturday · 7 PM', 'Family-style Chinatown',
+      [['Dinner', 'China Live, one big round table. Backup: R&G Lounge'], ['Order', 'Dumplings, noodles, roast duck. Everything shared'], ['Then', 'A walk under the lanterns on Grant Avenue']], [37.7979, -122.4071]),
+    P('11', 'sun', 'Sunday morning: coffee and sourdough at the Ferry Building', 'Sunday · 9:30 AM', 'Coffee & sourdough',
+      [['Where', 'Ferry Building Marketplace on the Embarcadero'], ['Eat', 'Coffee, sourdough, pastries, breakfast bites'], ['Then', 'A stroll along the water with the Bay Bridge in view']], [37.7955, -122.3937]),
+    P('12', 'sun', 'Sunday: one last look from Twin Peaks. See you in San Francisco', 'Sunday · 11:30 AM', 'One last look',
+      [['Where', 'Twin Peaks, the 360° view of the whole city'], ['Tip', 'It’s windy up top. Too foggy? We skip it.'], ['Then', 'Pack up around 1 PM and head home']], [37.7544, -122.4477]),
+    { kind: 'map' },
+    { kind: 'rsvp' },
+    { kind: 'vote' },
+    { kind: 'photos' }
   ];
 
-  const track = document.getElementById('track'), dots = document.getElementById('dots');
-  const prev = document.getElementById('prev'), next = document.getElementById('next'), hint = document.getElementById('hint');
-  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const track = $('track'), dots = $('dots'), prev = $('prev'), next = $('next'), hint = $('hint');
+  let toastT;
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const panelBg = img => '<div class="pbg" style="background-image:url(img/' + img + ')"></div><div class="pshade"></div>';
+  const gcal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Cousins Trip: San Francisco') +
+               '&dates=20270722/20270726&location=' + encodeURIComponent('San Francisco, CA') + '&details=' + encodeURIComponent('Four days by the bay. The plan: ' + SITE);
+
+  const builders = {
+    countdown: () =>
+      '<div class="panel">' + panelBg('bridge.jpg') +
+      '<div class="kick">THE COUNTDOWN IS ON</div><div class="script">San Francisco in</div>' +
+      '<div class="num" id="cd-days">0</div><div class="days">DAYS</div>' +
+      '<div class="clock" role="timer" aria-live="off"><div><b id="cd-h">00</b><span>HRS</span></div><div><b id="cd-m">00</b><span>MIN</span></div><div><b id="cd-s">00</b><span>SEC</span></div></div>' +
+      '<div id="wx"></div>' +
+      '<div class="btnrow"><a class="btn" href="cousins-trip.ics" download="cousins-trip.ics">+ iPhone calendar</a><a class="btn ghost" href="' + esc(gcal) + '" target="_blank" rel="noopener">+ Google Calendar</a></div>' +
+      '</div>',
+    map: () =>
+      '<div class="panel mappanel">' +
+      '<div class="mhead"><div class="kick">EVERY STOP, ONE CITY</div><div class="huge">The Map</div></div>' +
+      '<div id="map" role="region" aria-label="Map of every stop on the trip"></div>' +
+      '<div class="legend"><span style="--c:var(--coral)">THU</span><span style="--c:var(--gold)">FRI</span><span style="--c:var(--teal)">SAT</span><span style="--c:#FF9FBE">SUN</span></div>' +
+      '</div>',
+    rsvp: () =>
+      '<div class="panel">' + panelBg('bg-house.jpg') +
+      '<div class="kick">ROLL CALL</div><div class="script">So…</div><div class="huge">Who’s in?</div>' +
+      '<form id="rsvpForm" style="width:100%" novalidate>' +
+      '<label class="qlabel" for="rsvpName">Your name</label>' +
+      '<input class="field" id="rsvpName" name="name" autocomplete="given-name" placeholder="First name is fine">' +
+      '<div class="choices" role="group" aria-label="Are you in?">' +
+        ['I’m in!', 'Maybe', 'Can’t make it'].map(a => '<button type="button" class="choice" data-a="' + esc(a) + '" aria-pressed="false">' + esc(a) + '</button>').join('') +
+      '</div><div class="btnrow"><button class="btn" type="submit">Send it</button></div>' +
+      '<div class="note" id="rsvpNote" aria-live="polite"></div></form>' +
+      '<div class="btnrow" style="margin-top:1%"><a class="btn ghost" id="playlistBtn" href="#" target="_blank" rel="noopener">&#9654; Add songs to the trip playlist</a></div>' +
+      '<div class="note">Tip: tap Share, then Add to Home Screen, to keep this like an app.</div>' +
+      '</div>',
+    vote: () =>
+      '<div class="panel">' + panelBg('bg-cruise.jpg') +
+      '<div class="kick">YOU DECIDE</div><div class="script">Cast your</div><div class="huge">Vote</div>' +
+      '<div class="qlabel">Friday dinner cruise</div>' +
+      '<div class="choices two" role="group" aria-label="Friday dinner cruise" data-q="cruise">' +
+        ['Premier', 'Signature'].map(a => '<button type="button" class="choice" data-a="' + a + '" aria-pressed="false">' + a + '<small data-r="' + a + '"></small></button>').join('') + '</div>' +
+      '<div class="qlabel">Saturday dinner</div>' +
+      '<div class="choices two" role="group" aria-label="Saturday dinner" data-q="dinner">' +
+        ['Chinatown', 'North Beach'].map(a => '<button type="button" class="choice" data-a="' + a + '" aria-pressed="false">' + a + '<small data-r="' + a + '"></small></button>').join('') + '</div>' +
+      '<div class="btnrow"><button class="btn" id="voteBtn" type="button">Lock in my vote</button></div>' +
+      '<div class="note" id="voteNote" aria-live="polite">Votes are anonymous.</div>' +
+      '</div>',
+    photos: () =>
+      '<div class="panel">' + panelBg('bg-view.jpg') +
+      '<div class="kick">AFTER THE TRIP</div><div class="script">Add your</div><div class="huge">Photos</div>' +
+      '<div class="sub">Once we’re home, everyone drops their best shots into one shared album and this page becomes our recap.</div>' +
+      '<div class="btnrow"><a class="btn" id="photosBtn" href="#" target="_blank" rel="noopener">Open the album</a></div>' +
+      '<div class="note" id="photosNote"></div>' +
+      '</div>'
+  };
 
   pages.forEach((p, i) => {
     const s = document.createElement('section');
-    s.className = 'slide';
+    s.className = 'slide'; s.dataset.day = p.day || '';
     s.setAttribute('aria-label', 'Page ' + (i + 1) + ' of ' + pages.length);
-    if (p.countdown) {
-      s.innerHTML = '<div class="blur" style="background-image:url(img/01-thumb.jpg)"></div>' +
-        '<div class="count" role="timer" aria-live="off"><div class="bgimg"></div><div class="shade"></div>' +
-        '<div class="k1">THE COUNTDOWN IS ON</div><div class="script">San Francisco in</div>' +
-        '<div class="num" id="cd-days">0</div><div class="days">DAYS</div>' +
-        '<div class="clock"><div><b id="cd-h">00</b><span>HRS</span></div><div><b id="cd-m">00</b><span>MIN</span></div><div><b id="cd-s">00</b><span>SEC</span></div></div>' +
-        '<div class="date">THURSDAY &middot; JULY 22, 2027</div></div>';
+    if (p.kind) {
+      const bg = { countdown: '01', map: '12', rsvp: '04', vote: '05', photos: '12' }[p.kind];
+      s.innerHTML = '<div class="blur" style="background-image:url(img/' + bg + '-thumb.jpg)"></div>' + builders[p.kind]();
     } else {
       const rows = p.rows.map(r => '<div class="row"><div class="k">' + esc(r[0]) + '</div><div class="v">' + esc(r[1]) + '</div></div>').join('');
       s.innerHTML = '<div class="blur" style="background-image:url(img/' + p.img + '-thumb.jpg)"></div>' +
         '<div class="card" role="button" tabindex="0" aria-pressed="false" aria-label="' + esc(p.alt) + '. Tap for details.">' +
-          '<div class="face front"><img src="img/' + p.img + '.jpg" alt="' + esc(p.alt) + '" ' + (i < 3 ? 'fetchpriority="high"' : 'loading="lazy"') + ' draggable="false"></div>' +
+          '<div class="face front"><img src="img/' + p.img + '.jpg" alt="' + esc(p.alt) + '" ' + (i < 3 ? 'fetchpriority="high"' : 'loading="lazy"') + ' draggable="false"><div class="today-chip">Today!</div></div>' +
           '<div class="face back"><div class="bgimg" style="background-image:url(img/' + p.img + '-thumb.jpg)"></div>' +
-            '<div class="when">' + esc(p.when) + '</div><div class="what">' + esc(p.what) + '</div>' + rows +
-            '<div class="close">Tap to flip back</div></div>' +
+            '<div class="when">' + esc(p.when) + '</div><div class="what">' + esc(p.what) + '</div>' + rows + '<div class="close">Tap to flip back</div></div>' +
         '</div>';
       const card = s.querySelector('.card');
       const flip = () => { const on = card.classList.toggle('flipped'); card.setAttribute('aria-pressed', on ? 'true' : 'false'); hint.classList.add('gone'); };
@@ -163,21 +303,121 @@
     dots.appendChild(d);
   });
 
-  // countdown
+  /* countdown */
   const two = n => String(n).padStart(2, '0');
   function tick() {
     let ms = Math.max(0, TRIP - Date.now());
     const d = Math.floor(ms / 864e5); ms -= d * 864e5;
     const h = Math.floor(ms / 36e5); ms -= h * 36e5;
     const m = Math.floor(ms / 6e4); ms -= m * 6e4;
-    document.getElementById('cd-days').textContent = d;
-    document.getElementById('cd-h').textContent = two(h);
-    document.getElementById('cd-m').textContent = two(m);
-    document.getElementById('cd-s').textContent = two(Math.floor(ms / 1000));
+    $('cd-days').textContent = d; $('cd-h').textContent = two(h); $('cd-m').textContent = two(m); $('cd-s').textContent = two(Math.floor(ms / 1000));
   }
   tick(); setInterval(tick, 1000);
 
-  // paging
+  /* SF weather from Open-Meteo (free, no key) */
+  const WMO = c => c === 0 ? 'Clear' : c <= 2 ? 'Partly cloudy' : c === 3 ? 'Cloudy' : c <= 48 ? 'Foggy' : c <= 67 ? 'Rain' : c <= 77 ? 'Snow' : c <= 82 ? 'Showers' : 'Storms';
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=16')
+    .then(r => r.json()).then(w => {
+      const days = (w.daily && w.daily.time) || [];
+      const trip = days.map((t, k) => [t, k]).filter(([t]) => TRIP_DAYS[t]);
+      if (trip.length) {
+        $('wx').innerHTML = '<div class="wxdays">' + trip.map(([t, k]) => '<div><i>' + TRIP_DAYS[t].toUpperCase() + '</i><b>' +
+          Math.round(w.daily.temperature_2m_max[k]) + '°/' + Math.round(w.daily.temperature_2m_min[k]) + '°</b><span>' + WMO(w.daily.weather_code[k]) + '</span></div>').join('') + '</div>';
+      } else if (w.current) {
+        $('wx').innerHTML = '<div class="wx"><b>' + Math.round(w.current.temperature_2m) + '°F</b><div>Right now in SF: ' + WMO(w.current.weather_code).toLowerCase() +
+          '.<br>Our trip forecast shows up here two weeks out.</div></div>';
+      }
+    }).catch(() => {});
+
+  /* map */
+  let map;
+  function buildMap() {
+    if (map || !window.L) return;
+    map = L.map('map', { zoomControl: false }).setView([37.785, -122.43], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 18, subdomains: 'abcd',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    const pts = []; let n = 0;
+    pages.forEach((p, i) => {
+      if (!p.map) return;
+      n++;
+      const icon = L.divIcon({ className: '', html: '<div class="pin ' + p.day + '">' + n + '</div>', iconSize: [30, 30], iconAnchor: [15, 15] });
+      L.marker(p.map, { icon, title: p.what }).addTo(map)
+        .bindPopup('<b>' + esc(p.what) + '</b>' + esc(p.when) + '<br><a href="#p' + (i + 1) + '" data-go="' + i + '">See the page &rarr;</a>');
+      pts.push(p.map);
+    });
+    map.fitBounds(pts, { padding: [24, 24] });
+    map.on('popupopen', e => { const a = e.popup.getElement().querySelector('[data-go]'); if (a) a.addEventListener('click', ev => { ev.preventDefault(); go(+a.dataset.go); }); });
+  }
+
+  /* Google Forms */
+  const submitForm = (cfg, fields) => { const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => fd.append(k, v)); return fetch(cfg.action, { method: 'POST', mode: 'no-cors', body: fd }); };
+  const rsvpOn = C.rsvp && C.rsvp.action && C.rsvp.nameEntry && C.rsvp.answerEntry;
+  const voteOn = C.vote && C.vote.action && C.vote.cruiseEntry && C.vote.dinnerEntry;
+
+  let rsvpAns = '';
+  document.querySelectorAll('#rsvpForm .choice').forEach(b => b.addEventListener('click', () => {
+    rsvpAns = b.dataset.a;
+    document.querySelectorAll('#rsvpForm .choice').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  }));
+  $('rsvpForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('rsvpName').value.trim();
+    if (!name) { $('rsvpNote').textContent = 'Add your name first.'; $('rsvpName').focus(); return; }
+    if (!rsvpAns) { $('rsvpNote').textContent = 'Pick one: I’m in, Maybe, or Can’t make it.'; return; }
+    if (!rsvpOn) { $('rsvpNote').textContent = 'Preview mode: the RSVP form isn’t connected yet.'; return; }
+    submitForm(C.rsvp, { [C.rsvp.nameEntry]: name, [C.rsvp.answerEntry]: rsvpAns }).then(() => {
+      $('rsvpNote').textContent = rsvpAns === 'I’m in!' ? 'Got it, ' + name + '. See you in San Francisco!' : 'Thanks, ' + name + '. Got your answer.';
+      store.set('cousins-rsvp', rsvpAns);
+    }).catch(() => { $('rsvpNote').textContent = 'That didn’t send. Check your connection and try again.'; });
+  });
+  const pl = $('playlistBtn');
+  if (C.playlistUrl) pl.href = C.playlistUrl;
+  else { pl.setAttribute('aria-disabled', 'true'); pl.addEventListener('click', e => { e.preventDefault(); toast('The YouTube Music playlist is coming soon.'); }); }
+
+  const pick = {};
+  document.querySelectorAll('[data-q] .choice').forEach(b => b.addEventListener('click', () => {
+    const g = b.parentElement; pick[g.dataset.q] = b.dataset.a;
+    g.querySelectorAll('.choice').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  }));
+  function showResults(rows) {
+    const tally = { Premier: 0, Signature: 0, Chinatown: 0, 'North Beach': 0 };
+    rows.forEach(r => r.forEach(v => { if (v in tally) tally[v]++; }));
+    const pct = (a, b) => (a + b) ? Math.round(100 * a / (a + b)) : 0;
+    const set = (k, o) => { const el = document.querySelector('[data-r="' + k + '"]'); if (el) el.textContent = tally[k] + ' vote' + (tally[k] === 1 ? '' : 's') + ' · ' + pct(tally[k], tally[o]) + '%'; };
+    set('Premier', 'Signature'); set('Signature', 'Premier'); set('Chinatown', 'North Beach'); set('North Beach', 'Chinatown');
+  }
+  function loadResults() {
+    if (!C.voteCsv) return;
+    fetch(C.voteCsv + (C.voteCsv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
+      showResults(t.trim().split(/\r?\n/).slice(1).map(l => l.split(',').map(v => v.replace(/^"|"$/g, '').trim())));
+    }).catch(() => {});
+  }
+  if (store.get('cousins-voted')) $('voteNote').textContent = 'You already voted. Thanks!';
+  $('voteBtn').addEventListener('click', () => {
+    if (!pick.cruise || !pick.dinner) { $('voteNote').textContent = 'Pick one for each question first.'; return; }
+    if (!voteOn) { $('voteNote').textContent = 'Preview mode: voting isn’t connected yet.'; return; }
+    if (store.get('cousins-voted')) { $('voteNote').textContent = 'You already voted. Thanks!'; return; }
+    submitForm(C.vote, { [C.vote.cruiseEntry]: pick.cruise, [C.vote.dinnerEntry]: pick.dinner }).then(() => {
+      store.set('cousins-voted', '1'); $('voteNote').textContent = 'Vote locked in. Results update in about a minute.'; setTimeout(loadResults, 4000);
+    }).catch(() => { $('voteNote').textContent = 'That didn’t send. Check your connection and try again.'; });
+  });
+  loadResults();
+
+  const ph = $('photosBtn');
+  if (C.photosUrl) ph.href = C.photosUrl;
+  else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album opens after the trip.'; ph.addEventListener('click', e => { e.preventDefault(); toast('The photo album opens after the trip.'); }); }
+
+  /* music */
+  const music = $('music'), mb = $('musicBtn');
+  mb.addEventListener('click', () => {
+    if (music.paused) { music.volume = .55; music.play().then(() => { mb.classList.add('on'); mb.setAttribute('aria-pressed', 'true'); mb.setAttribute('aria-label', 'Pause music'); }).catch(() => toast('Tap again to start the music.')); }
+    else { music.pause(); mb.classList.remove('on'); mb.setAttribute('aria-pressed', 'false'); mb.setAttribute('aria-label', 'Play music'); }
+  });
+
+  /* paging */
   let cur = -1;
   function go(i) { i = Math.max(0, Math.min(pages.length - 1, i)); track.scrollTo({ left: i * track.clientWidth }); }
   function update() {
@@ -191,20 +431,44 @@
       });
       [...dots.children].forEach((d, k) => { d.classList.toggle('on', k === i); d.setAttribute('aria-current', k === i ? 'true' : 'false'); });
       prev.disabled = i === 0; next.disabled = i === pages.length - 1;
-      if (location.hash !== '#p' + (i + 1)) history.replaceState(null, '', '#p' + (i + 1));
+      if (pages[i].kind === 'map') { buildMap(); setTimeout(() => map && map.invalidateSize(), 60); }
+      if (pages[i].kind === 'vote') loadResults();
+      if (location.hash !== '#p' + (i + 1)) history.replaceState(null, '', location.pathname + location.search + '#p' + (i + 1));
     }
     if (i > 0) hint.classList.add('gone');
   }
   track.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
   prev.addEventListener('click', () => go(cur - 1));
   next.addEventListener('click', () => go(cur + 1));
-  addEventListener('keydown', e => { if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1); });
-  addEventListener('resize', () => { track.style.scrollBehavior = 'auto'; track.scrollLeft = cur * track.clientWidth; track.style.scrollBehavior = ''; });
+  addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, #map')) return;
+    if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+  addEventListener('resize', () => { track.style.scrollBehavior = 'auto'; track.scrollLeft = cur * track.clientWidth; track.style.scrollBehavior = ''; map && map.invalidateSize(); });
   setTimeout(() => hint.classList.add('gone'), 5000);
 
-  const start = parseInt((location.hash.match(/^#p(\d+)$/) || [])[1], 10);
-  if (start > 1) { track.style.scrollBehavior = 'auto'; track.scrollLeft = (start - 1) * track.clientWidth; track.style.scrollBehavior = ''; }
+  /* day-of mode: during the trip, open on today's first stop (test with ?today=2027-07-23) */
+  const sfDate = () => new URLSearchParams(location.search).get('today') || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+  const todayKey = TRIP_DAYS[sfDate()];
+  let startAt = parseInt((location.hash.match(/^#p(\d+)$/) || [])[1], 10) - 1;
+  if (todayKey) {
+    [...track.children].forEach(s => s.classList.toggle('is-today', s.dataset.day === todayKey));
+    if (!(startAt >= 0)) startAt = pages.findIndex(p => p.day === todayKey);
+    hint.textContent = 'It’s trip day! Here’s what’s on today →';
+  }
+  if (startAt > 0) { track.style.scrollBehavior = 'auto'; track.scrollLeft = startAt * track.clientWidth; track.style.scrollBehavior = ''; }
   update();
+
+  /* passcode gate: keeps casual visitors out, not real security */
+  const hash = s => { let h = 2166136261 >>> 0; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+  if (C.passcodeHash && store.get('cousins-pass') !== C.passcodeHash) {
+    const gate = $('gate'); gate.hidden = false;
+    $('gateForm').addEventListener('submit', e => {
+      e.preventDefault();
+      if (hash($('gatePass').value.trim().toLowerCase()) === C.passcodeHash) { store.set('cousins-pass', C.passcodeHash); gate.hidden = true; }
+      else { $('gateErr').textContent = 'Not quite. Ask the family chat for the passcode.'; $('gatePass').select(); }
+    });
+  }
 </script>
 </body>
 </html>

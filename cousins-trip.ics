@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cousins Trip//SF 2027//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:cousins-trip-sf-2027@natebutlerexplains.github.io
+DTSTAMP:20261114T230000Z
+DTSTART;VALUE=DATE:20270722
+DTEND;VALUE=DATE:20270726
+SUMMARY:Cousins Trip: San Francisco
+LOCATION:San Francisco\, CA
+DESCRIPTION:Four days by the bay. The plan: https://natebutlerexplains.github.io/cousins-sf/
+URL:https://natebutlerexplains.github.io/cousins-sf/
+TRANSP:OPAQUE
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Cousins Trip: San Francisco is in one week
+TRIGGER:-P7D
+END:VALARM
+END:VEVENT
+END:VCALENDAR
