@@ -19,6 +19,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cousins SF">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="flights.css">
 <style>
   @font-face { font-family: Anton; src: url(fonts/anton-latin-400-normal.woff2) format('woff2'); font-display: swap; }
   @font-face { font-family: Bebas; src: url(fonts/bebas-neue-latin-400-normal.woff2) format('woff2'); font-display: swap; }
@@ -441,7 +442,7 @@
   prev.addEventListener('click', () => go(cur - 1));
   next.addEventListener('click', () => go(cur + 1));
   addEventListener('keydown', e => {
-    if (e.target.closest && e.target.closest('input, #map')) return;
+    if (document.body.classList.contains('fopen') || (e.target.closest && e.target.closest('input, select, #map'))) return;
     if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1);
   });
   addEventListener('resize', () => { track.style.scrollBehavior = 'auto'; track.scrollLeft = cur * track.clientWidth; track.style.scrollBehavior = ''; map && map.invalidateSize(); });
@@ -470,5 +471,6 @@
     });
   }
 </script>
+<script src="flights.js"></script>
 </body>
 </html>

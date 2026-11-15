@@ -10,6 +10,12 @@ window.TRIP_CONFIG = {
   playlistUrl: 'https://youtu.be/sIQMnh5teuI?si=zaOkGLneMNseAWnn',
   // Google Photos shared album link, for after the trip.
   photosUrl: '',
+  // Flights form ("Cousins Trip: Flights"). From its pre-filled link + the published CSV of its sheet.
+  flights: {
+    action: '',
+    entries: { name: '', arrAirport: '', arrDate: '', arrTime: '', arrFlight: '', depAirport: '', depDate: '', depTime: '', depFlight: '' },
+    csv: ''
+  },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.
