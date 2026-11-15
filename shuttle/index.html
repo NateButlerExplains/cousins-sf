@@ -133,11 +133,12 @@
     const box = $('quotes');
     if (!quotes.length) { box.innerHTML = '<div class="empty">No quotes yet. Call a company below, then add what they said.</div>'; return; }
     const sorted = quotes.slice().sort((a, b) => (money(a.total) ?? 1e9) - (money(b.total) ?? 1e9));
-    const cheapest = sorted.find(q => money(q.total) != null);
+    const comparable = sorted.filter(q => money(q.total) != null);
+    const cheapest = comparable.length > 1 ? comparable[0] : null;
     if (view === 'cards') {
       box.innerHTML = '<div class="cards">' + sorted.map(q => '<article class="card' + (q.status === 'Booked' ? ' pick' : '') + '"><div class="body">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>' + esc(q.title) + '</h3>' + statusChip(q.status) + '</div>' +
-        (q.vehicle ? '<div class="vehicle">' + esc(q.vehicle) + (q.seats ? ' · ' + esc(q.seats) + ' seats' : '') + '</div>' : '') +
+        (q.vehicle ? '<div class="vehicle">' + esc(q.vehicle) + (q.seats ? ' · ' + esc(q.seats) + (/^\d+$/.test(q.seats) ? ' seats' : '') : '') + '</div>' : '') +
         (q.total ? '<div class="price">' + esc(q.total) + ' <small>' + (q.fees === 'Yes' ? 'all in' : q.fees === 'No' ? 'before tip &amp; tax' : '') + (q === cheapest && quotes.filter(x => money(x.total) != null).length > 1 ? ' · lowest' : '') + '</small></div>' : '') +
         '<div class="chips">' + yn(q.tracking) + 'Flight tracking</span>' + yn(q.fees) + 'Fees &amp; tip included</span>' + (q.luggage ? '<span class="chip">' + esc(q.luggage) + '</span>' : '') + '</div>' +
         (q.notes ? '<div class="note">' + esc(q.notes) + '</div>' : '') +
@@ -145,7 +146,7 @@
         '<button class="btn small ghost" type="button" data-edit="' + esc(q.title) + '">Update</button></div></div></article>').join('') + '</div>';
     } else {
       const rows = [['Status', q => statusChip(q.status)], ['Vehicle', q => esc(q.vehicle || '—')], ['Seats', q => esc(q.seats || '—')],
-        ['All-in price', q => esc(q.total || '—'), q => cheapest && q === cheapest],
+        ['Price', q => esc(q.total || '—'), q => cheapest && q === cheapest],
         ['Flight tracking', q => esc(q.tracking || 'Not sure'), q => q.tracking === 'Yes'], ['Fees &amp; tip incl.', q => esc(q.fees || 'Not sure'), q => q.fees === 'Yes'],
         ['Luggage', q => esc(q.luggage || '—')], ['Notes', q => esc(q.notes || '—')]];
       box.innerHTML = '<div class="cmpwrap"><table class="cmp"><tr><th scope="row">Company</th>' + sorted.map(q => '<td class="name">' + esc(q.title) + '</td>').join('') + '</tr>' +
