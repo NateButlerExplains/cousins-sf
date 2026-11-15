@@ -64,10 +64,9 @@
 
   <section class="sec" aria-labelledby="hAdd" id="addSec">
     <h2 id="hAdd">Add a house</h2>
-    <p class="sub">Paste the Airbnb link and the cover photo comes in on its own. Add the key details from the listing so we can compare.</p>
+    <p class="sub">Paste the Airbnb link and the key details so we can compare. Airbnb doesn’t let other sites pull its photos, so paste photo links too (easiest from a computer: right-click a photo, then Copy Image Address).</p>
     <form class="form" id="sForm" novalidate>
       <label class="f">Airbnb link<input class="field" name="link" type="url" inputmode="url" placeholder="https://www.airbnb.com/rooms/…" required></label>
-      <div id="preview"></div>
       <label class="f">House name<input class="field" name="title" placeholder="Vibrant 5BR home in Daly City" required></label>
       <div class="grid3">
         <label class="f">Price per night<input class="field" name="price" inputmode="decimal" placeholder="$450"></label>
@@ -78,10 +77,11 @@
         <label class="f">Baths<input class="field" name="baths" inputmode="decimal" placeholder="3"></label>
       </div>
       <label class="f">Area<input class="field" name="area" placeholder="Daly City, near BART"></label>
-      <label class="f">More photos <span class="hint">Optional. On Airbnb, long-press a photo, copy the image address, and paste one per line.</span><textarea class="field" name="photos" placeholder="https://a0.muscache.com/im/pictures/…"></textarea></label>
+      <label class="f">Cover photo link <span class="hint">The photo everyone sees first.</span><input class="field" name="photo" type="url" inputmode="url" placeholder="https://a0.muscache.com/im/pictures/…"></label>
+      <div id="preview"></div>
+      <label class="f">More photo links <span class="hint">Optional, one per line. They show in the photo viewer.</span><textarea class="field" name="photos" placeholder="https://a0.muscache.com/im/pictures/…"></textarea></label>
       <label class="f">What stands out<textarea class="field" name="notes" placeholder="Parking for two cars, big kitchen, 12 min to SFO…"></textarea></label>
       <label class="f">Your first name<input class="field" name="name" autocomplete="given-name"></label>
-      <input type="hidden" name="photo">
       <button class="btn" type="submit">Add this house</button>
     </form>
   </section>
@@ -101,7 +101,7 @@
   gate(); adminBar('stays');
 
   const SAMPLE = [
-    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/1114748488486103618', title: 'Vibrant 5BR Home in Daly City', photo: 'https://a0.muscache.com/im/pictures/fe7217ff-0b24-438d-880d-b94722c75bf5.jpg',
+    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/1114748488486103618', title: 'Vibrant 5BR Home in Daly City',
       bedrooms: '5', beds: '7', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Skylights, self check-in.', name: 'Sample' },
     { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/692737389034014743', title: 'Next to Daly City BART', bedrooms: '5', beds: '5', baths: '3', sleeps: '10', area: 'Daly City, by BART', notes: 'Across the street from BART.', name: 'Sample' },
     { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/683391371233439307', title: 'Modern Home with Movie Theater', bedrooms: '4', beds: '4', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Snack bar and home theater.', name: 'Sample' },
@@ -229,21 +229,24 @@
   /* add a house: grab the cover photo from the link */
   const form = $('sForm'), F = form.elements;
   if (store.get('cousins-name')) F.name.value = store.get('cousins-name');
-  let lastLookup = '';
-  function lookup() {
-    const u = cleanLink(F.link.value); if (!/^https?:\/\//.test(u) || u === lastLookup) return; lastLookup = u;
+  // Duplicate check as soon as a link is pasted
+  let lastLink = '';
+  function checkLink() {
+    const u = cleanLink(F.link.value); if (!/^https?:\/\//.test(u) || u === lastLink) return; lastLink = u;
     const dup = houses.find(h => h.key === lid(u));
-    if (dup) { pop({ kind: 'dup', title: 'Already added', msg: (dup.title || 'That house') + ' is already on the list' + (dup.name && dup.name !== 'Sample' ? ' (added by ' + dup.name + ')' : '') + '.', buttons: [{ label: 'See it', onClick: () => { setTimeout(() => openViewer(dup), 200); } }, { label: 'OK', ghost: true }] }); return; }
-    $('preview').innerHTML = '<div class="note">Getting the cover photo…</div>';
-    fetch('https://api.microlink.io/?url=' + encodeURIComponent(u)).then(r => r.json()).then(j => {
-      if (cleanLink(F.link.value) !== u) return;
-      const img = j && j.status === 'success' && j.data && j.data.image && j.data.image.url;
-      F.photo.value = img || '';
-      $('preview').innerHTML = img ? '<div class="preview"><img src="' + esc(sized(img, 480)) + '" alt="Cover photo" referrerpolicy="no-referrer"><div class="note">Got the cover photo. Add the name and details from the listing below.</div></div>'
-                                   : '<div class="note">Couldn’t grab a photo from that link. You can paste photo links under More photos.</div>';
-    }).catch(() => { $('preview').innerHTML = '<div class="note">Couldn’t grab a photo right now. You can paste photo links under More photos.</div>'; });
+    if (dup) pop({ kind: 'dup', title: 'Already added', msg: (dup.title || 'That house') + ' is already on the list' + (dup.name && dup.name !== 'Sample' ? ' (added by ' + dup.name + ')' : '') + '. Vote for it instead.', buttons: [{ label: 'See it', onClick: () => { setTimeout(() => openViewer(dup), 200); } }, { label: 'OK', ghost: true }] });
   }
-  F.link.addEventListener('change', lookup); F.link.addEventListener('paste', () => setTimeout(lookup, 50)); F.link.addEventListener('blur', lookup);
+  F.link.addEventListener('change', checkLink); F.link.addEventListener('paste', () => setTimeout(checkLink, 50)); F.link.addEventListener('blur', checkLink);
+  // Live preview of the cover photo link
+  function previewPhoto() {
+    const u = F.photo.value.trim();
+    if (!/^https?:\/\//.test(u)) { $('preview').innerHTML = ''; return; }
+    $('preview').innerHTML = '<div class="preview"><img id="pvImg" src="' + esc(sized(u, 480)) + '" alt="Cover photo preview" referrerpolicy="no-referrer"><div class="note" id="pvNote">Loading the photo\u2026</div></div>';
+    $('pvImg').onload = () => { $('pvNote').textContent = 'Looks good. This is the cover photo.'; };
+    $('pvImg').onerror = () => { $('pvNote').textContent = 'That link isn\u2019t a photo. Copy the image address, not the page link.'; };
+  }
+  F.photo.addEventListener('input', previewPhoto); F.photo.addEventListener('paste', () => setTimeout(previewPhoto, 50));
+
   form.addEventListener('submit', e => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(form).entries());
@@ -258,7 +261,7 @@
       if (f.name) store.set('cousins-name', f.name.trim());
       const h = Object.assign({ tracker: 'Stay', key: lid(f.link), voters: [] }, f); houses.push(h); render();
       pop({ kind: 'ok', title: 'House added', msg: (f.title || 'It') + ' is on the list. Everyone sees it in a minute or two.' });
-      form.reset(); $('preview').innerHTML = ''; lastLookup = ''; if (f.name) F.name.value = f.name;
+      form.reset(); $('preview').innerHTML = ''; lastLink = ''; if (f.name) F.name.value = f.name;
     }).catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }));
   });
 
