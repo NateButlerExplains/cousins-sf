@@ -12,8 +12,9 @@ window.TRIP_CONFIG = {
   photosUrl: '',
   // Flights form ("Cousins Trip: Flights"). From its pre-filled link + the published CSV of its sheet.
   flights: {
-    action: '',
-    entries: { name: '', arrAirport: '', arrDate: '', arrTime: '', arrFlight: '', depAirport: '', depDate: '', depTime: '', depFlight: '' },
+    action: 'https://docs.google.com/forms/d/e/1FAIpQLSd6FyEjCNbDOplu_ybVNHx9Z8yzEHz80H2pDdZuGPBp76CsBw/formResponse',
+    entries: { name: 'entry.1733835951', arrAirport: 'entry.1905659587', arrDate: 'entry.1670464706', arrTime: 'entry.265497829', arrFlight: 'entry.306724696',
+               depAirport: 'entry.342429616', depDate: 'entry.2092554577', depTime: 'entry.1098740039', depFlight: 'entry.991840690' },
     csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_DQ6Cl0nIQNLyGzeZ6vG2lggeYGpCKgpbtYxm4rurN7ehvtZb8owOH99HXgUKRxxSkHUAC74CmMOL/pub?gid=1504606241&single=true&output=csv'
   },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
