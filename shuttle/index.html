@@ -34,7 +34,7 @@
       <div class="script">Shuttle</div>
       <div class="huge">Tracker</div>
       <p class="lead">One ride for the whole crew. Collect quotes here, compare them side by side, and line pickups up with everyone’s flights.</p>
-      <div class="sample" id="sampleTag" hidden>Sample quotes · real ones show up once the form is connected</div>
+      <div class="sample" id="sampleTag" hidden>Saving quotes turns on once the tracker form is connected</div>
     </div>
   </header>
 
@@ -109,11 +109,6 @@
     { title: 'MGL Limo – Executive Black Car', where: 'Burlingame', what: 'Sprinter vans and larger executive transportation.' },
     { title: 'Coach 21', where: 'Burlingame', what: 'Charter transportation and group transfers.' },
     { title: 'Allied Limos', where: 'Burlingame', what: '14-passenger Sprinter and 27-passenger shuttle bus.' }
-  ];
-  const SAMPLE = [
-    { tracker: 'Shuttle quote', title: 'Allied Limos', vehicle: '27-passenger shuttle bus', seats: '27', total: '$1,450', tracking: 'Yes', fees: 'Yes', luggage: 'Full rear luggage bay', status: 'Quoted', notes: 'Round trip. 50% deposit.' },
-    { tracker: 'Shuttle quote', title: 'MGL Limo – Executive Black Car', vehicle: 'Two Sprinter vans', seats: '28', total: '$1,700', tracking: 'Yes', fees: 'No', luggage: 'Tight with big suitcases', status: 'Quoted', notes: 'Gratuity 20% extra.' },
-    { tracker: 'Shuttle quote', title: 'Coach 21', vehicle: '', seats: '', total: '', tracking: '', fees: '', luggage: '', status: 'Asked', notes: 'Left a message.' }
   ];
   let quotes = [], view = 'cards';
   const key = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -216,7 +211,7 @@
 
   load().then(rows => {
     $('sampleTag').hidden = connected;
-    quotes = latestByCompany((rows || SAMPLE).filter(r => /shuttle/i.test(r.tracker || '')));
+    quotes = latestByCompany((rows || []).filter(r => /shuttle/i.test(r.tracker || '')));
     renderQuotes(); renderCompanies();
   }).catch(() => { quotes = []; renderQuotes(); renderCompanies(); });
   renderQuotes(); renderCompanies();

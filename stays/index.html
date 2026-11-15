@@ -43,7 +43,7 @@
       <div class="script">Pick the</div>
       <div class="huge">House</div>
       <p class="lead">Drop an Airbnb link, vote for your favorites, and stack the options side by side.</p>
-      <div class="sample" id="sampleTag" hidden>Sample houses · real ones show up once the form is connected</div>
+      <div class="sample" id="sampleTag" hidden>Adding houses and voting turn on once the tracker form is connected</div>
     </div>
   </header>
 
@@ -100,15 +100,6 @@
   const { $, esc, store, connected, load, submit, pop, askName, gate, adminBar } = window.TRK;
   gate(); adminBar('stays');
 
-  const SAMPLE = [
-    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/1114748488486103618', title: 'Vibrant 5BR Home in Daly City',
-      bedrooms: '5', beds: '7', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Skylights, self check-in.', name: 'Sample' },
-    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/692737389034014743', title: 'Next to Daly City BART', bedrooms: '5', beds: '5', baths: '3', sleeps: '10', area: 'Daly City, by BART', notes: 'Across the street from BART.', name: 'Sample' },
-    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/683391371233439307', title: 'Modern Home with Movie Theater', bedrooms: '4', beds: '4', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Snack bar and home theater.', name: 'Sample' },
-    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/1114748488486103618', name: 'Jay', status: 'yes' },
-    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/1114748488486103618', name: 'Mia', status: 'yes' },
-    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/692737389034014743', name: 'Ray', status: 'yes' }
-  ];
   let houses = [], view = 'cards', sortBy = 'votes';
   const picked = new Set();
   const lid = u => { const s = String(u || ''); const m = s.match(/airbnb\.[a-z.]+\/(?:h\/|rooms\/(?:plus\/)?)([\w-]+)/i); return m ? 'abnb:' + m[1].toLowerCase() : s.trim().toLowerCase().split(/[?#]/)[0].replace(/\/$/, ''); };
@@ -265,7 +256,7 @@
     }).catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }));
   });
 
-  load().then(rows => { $('sampleTag').hidden = connected; houses = build(rows || SAMPLE); render(); })
+  load().then(rows => { $('sampleTag').hidden = connected; houses = build(rows || []); render(); })
         .catch(() => { houses = []; render(); });
   render();
 })();
