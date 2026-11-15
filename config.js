@@ -14,7 +14,7 @@ window.TRIP_CONFIG = {
   flights: {
     action: '',
     entries: { name: '', arrAirport: '', arrDate: '', arrTime: '', arrFlight: '', depAirport: '', depDate: '', depTime: '', depFlight: '' },
-    csv: ''
+    csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_DQ6Cl0nIQNLyGzeZ6vG2lggeYGpCKgpbtYxm4rurN7ehvtZb8owOH99HXgUKRxxSkHUAC74CmMOL/pub?gid=1504606241&single=true&output=csv'
   },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',

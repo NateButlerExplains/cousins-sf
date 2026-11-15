@@ -43,7 +43,9 @@
     h = h % 12 || 12;
     return h + ':' + String(m).padStart(2, '0') + ' ' + ap;
   }
-  const dayIdx = d => DAYORDER.indexOf(d);
+  // Accepts "Thu Jul 22", "Thursday, July 22", "7/22/2027" etc.
+  function normDay(d) { const m = String(d || '').match(/(?:\b7\/|\b)(2[1-6])\b/); return m ? DAYORDER[+m[1] - 21] : (d || ''); }
+  const dayIdx = d => DAYORDER.indexOf(normDay(d));
   const absMin = (d, t) => dayIdx(d) * 1440 + t;
   const flightUrl = f => 'https://www.flightaware.com/live/flight/' + encodeURIComponent(String(f).replace(/\s+/g, '').toUpperCase());
   const flightLink = f => f ? '<a href="' + flightUrl(f) + '" target="_blank" rel="noopener">' + esc(f.toUpperCase()) + '</a>' : '—';
@@ -65,11 +67,15 @@
                  'departing airport': 'depAirport', 'departure date': 'depDate', 'departure time': 'depTime', 'departure flight': 'depFlight' };
   function rowsToFlights(rows) {
     if (!rows.length) return [];
-    const head = rows[0].map(h => COLS[h.trim().toLowerCase()] || null);
+    const keys = Object.keys(COLS).sort((x, y) => y.length - x.length);
+    const head = rows[0].map(h => { h = h.trim().toLowerCase(); const k = keys.find(k => h.startsWith(k)); return k ? COLS[k] : null; });
     const latest = new Map();   // newest submission per first name wins
     rows.slice(1).forEach(r => {
       const o = {}; head.forEach((k, i) => { if (k) o[k] = (r[i] || '').trim(); });
-      if (o.name) latest.set(o.name.toLowerCase(), o);
+      o.arrDate = normDay(o.arrDate); o.depDate = normDay(o.depDate);
+      o.arrAirport = (o.arrAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || o.arrAirport;
+      o.depAirport = (o.depAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || o.depAirport;
+      if (o.name) latest.set(o.name.trim().toLowerCase(), o);
     });
     return [...latest.values()];
   }
@@ -171,7 +177,7 @@
       const glow = L.polyline(path, { color: '#FFC857', weight: 10, opacity: .35, interactive: false }).addTo(map);
       const line = L.polyline(path, { color: '#120B27', weight: 4, opacity: .95, className: 'fdash', interactive: false }).addTo(map);
       layers.push(glow);
-      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fart van">' + VAN_ART + '</div>', iconSize: [56, 26], iconAnchor: [28, 21] }), title: 'Sprinter van', interactive: false, zIndexOffset: 800 }).addTo(map);
+      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fart van"><img src="img/sprinter.png" alt=""></div>', iconSize: [72, 32], iconAnchor: [36, 26] }), title: 'Sprinter van', interactive: false, zIndexOffset: 800 }).addTo(map);
       layers.push(m, line, van); vans.push({ van, path, off: k * 0.37 });
     });
     map.fitBounds(bounds, { paddingTopLeft: [50, 80], paddingBottomRight: [70, 70] });
