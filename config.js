@@ -17,6 +17,13 @@ window.TRIP_CONFIG = {
                depAirport: 'entry.342429616', depDate: 'entry.2092554577', depTime: 'entry.1098740039', depFlight: 'entry.991840690' },
     csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_DQ6Cl0nIQNLyGzeZ6vG2lggeYGpCKgpbtYxm4rurN7ehvtZb8owOH99HXgUKRxxSkHUAC74CmMOL/pub?gid=1504606241&single=true&output=csv'
   },
+  // Shuttle + stays trackers: one Google Form ("Cousins Trip: Trackers"). From its pre-filled link + the published CSV of its sheet.
+  trackers: {
+    action: '',
+    entries: { tracker: '', name: '', link: '', title: '', photo: '', photos: '', price: '', total: '', bedrooms: '', beds: '', baths: '', sleeps: '', area: '',
+               vehicle: '', seats: '', luggage: '', tracking: '', fees: '', status: '', notes: '' },
+    csv: ''
+  },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.

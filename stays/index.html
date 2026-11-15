@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#120B27">
+<title>Stays Tracker · Cousins Trip</title>
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../tracker.css">
+<style>
+  .shot { position: relative; aspect-ratio: 3 / 2; background: linear-gradient(135deg, #2a1d4a, #120B27); border: 0; padding: 0; width: 100%; cursor: zoom-in; display: block; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot .ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mute); font: 700 13px/1.3 DM; text-align: center; padding: 12px; }
+  .shot .count { position: absolute; right: 10px; bottom: 10px; padding: 5px 10px; border-radius: 999px; background: rgba(11,7,24,.85); font: 700 12px/1 DM; color: #fff; }
+  .votes { display: flex; align-items: center; gap: 8px; font: 700 13px/1.3 DM; color: var(--mute); }
+  .votes b { font: 400 30px/1 Bebas; color: var(--gold); }
+  .lead-badge { position: absolute; left: 10px; top: 10px; padding: 6px 10px; border-radius: 999px; background: var(--gold); color: var(--night); font: 700 12px/1 DM; letter-spacing: .06em; }
+  .preview { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1.5px solid var(--line); }
+  .preview img { width: 120px; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 10px; display: block; }
+  .cmpbar { position: sticky; bottom: 12px; z-index: 5; display: flex; justify-content: center; margin-top: 14px; }
+  body.admin .cmpbar { bottom: 84px; }
+  /* in-page photo viewer */
+  .viewer { position: fixed; inset: 0; z-index: 65; background: rgba(5,3,14,.96); display: flex; flex-direction: column; }
+  .vhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(12px + env(safe-area-inset-top)) 14px 10px; }
+  .vhead b { font: 400 24px/1.05 Bebas; letter-spacing: .04em; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vtrack { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .vtrack figure { flex: 0 0 100%; margin: 0; scroll-snap-align: center; display: grid; place-items: center; padding: 8px; }
+  .vtrack img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
+  .vfoot { padding: 10px 14px calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--mute); font: 700 13px/1 DM; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="ibtn" href="../" aria-label="Back to the main trip site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg></a>
+  </div>
+  <header class="hero">
+    <div class="bg" style="background-image:url(../img/bg-rsvp.jpg)"></div><div class="shade"></div>
+    <div>
+      <div class="kick">Where we’ll stay</div>
+      <div class="script">Pick the</div>
+      <div class="huge">House</div>
+      <p class="lead">Drop an Airbnb link, vote for your favorites, and stack the options side by side.</p>
+      <div class="sample" id="sampleTag" hidden>Sample houses · real ones show up once the form is connected</div>
+    </div>
+  </header>
+
+  <section class="sec" aria-labelledby="hList">
+    <h2 id="hList">The options</h2>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="vCards" aria-pressed="true">Cards</button><button type="button" id="vCompare" aria-pressed="false">Compare</button>
+      </div>
+      <div class="seg" role="group" aria-label="Sort">
+        <button type="button" data-sort="votes" aria-pressed="true">Most votes</button><button type="button" data-sort="price" aria-pressed="false">Lowest price</button><button type="button" data-sort="beds" aria-pressed="false">Most beds</button>
+      </div>
+      <button class="btn small ghost" type="button" id="jumpAdd">+ Add a house</button>
+    </div>
+    <div id="list"></div>
+    <div class="cmpbar" id="cmpBar" hidden><button class="btn" type="button" id="cmpGo"></button></div>
+  </section>
+
+  <section class="sec" aria-labelledby="hAdd" id="addSec">
+    <h2 id="hAdd">Add a house</h2>
+    <p class="sub">Paste the Airbnb link and the cover photo comes in on its own. Add the key details from the listing so we can compare.</p>
+    <form class="form" id="sForm" novalidate>
+      <label class="f">Airbnb link<input class="field" name="link" type="url" inputmode="url" placeholder="https://www.airbnb.com/rooms/…" required></label>
+      <div id="preview"></div>
+      <label class="f">House name<input class="field" name="title" placeholder="Vibrant 5BR home in Daly City" required></label>
+      <div class="grid3">
+        <label class="f">Price per night<input class="field" name="price" inputmode="decimal" placeholder="$450"></label>
+        <label class="f">Total for the stay<input class="field" name="total" inputmode="decimal" placeholder="$2,100"></label>
+        <label class="f">Sleeps<input class="field" name="sleeps" inputmode="numeric" placeholder="10"></label>
+        <label class="f">Bedrooms<input class="field" name="bedrooms" inputmode="numeric" placeholder="5"></label>
+        <label class="f">Beds<input class="field" name="beds" inputmode="numeric" placeholder="7"></label>
+        <label class="f">Baths<input class="field" name="baths" inputmode="decimal" placeholder="3"></label>
+      </div>
+      <label class="f">Area<input class="field" name="area" placeholder="Daly City, near BART"></label>
+      <label class="f">More photos <span class="hint">Optional. On Airbnb, long-press a photo, copy the image address, and paste one per line.</span><textarea class="field" name="photos" placeholder="https://a0.muscache.com/im/pictures/…"></textarea></label>
+      <label class="f">What stands out<textarea class="field" name="notes" placeholder="Parking for two cars, big kitchen, 12 min to SFO…"></textarea></label>
+      <label class="f">Your first name<input class="field" name="name" autocomplete="given-name"></label>
+      <input type="hidden" name="photo">
+      <button class="btn" type="submit">Add this house</button>
+    </form>
+  </section>
+</div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="vTitle" hidden>
+  <div class="vhead"><b id="vTitle"></b><button class="btn small ghost" type="button" id="vClose">&#10005; Close</button></div>
+  <div class="vtrack" id="vTrack" tabindex="0" aria-label="Photos, swipe to see more"></div>
+  <div class="vfoot"><span id="vCount"></span><a class="btn small ghost" id="vOpen" target="_blank" rel="noopener">See it on Airbnb ↗</a></div>
+</div>
+
+<script src="../config.js"></script>
+<script src="../tracker.js"></script>
+<script>
+(function () {
+  const { $, esc, store, connected, load, submit, pop, askName, gate, adminBar } = window.TRK;
+  gate(); adminBar('stays');
+
+  const SAMPLE = [
+    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/1114748488486103618', title: 'Vibrant 5BR Home in Daly City', photo: 'https://a0.muscache.com/im/pictures/fe7217ff-0b24-438d-880d-b94722c75bf5.jpg',
+      bedrooms: '5', beds: '7', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Skylights, self check-in.', name: 'Sample' },
+    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/692737389034014743', title: 'Next to Daly City BART', bedrooms: '5', beds: '5', baths: '3', sleeps: '10', area: 'Daly City, by BART', notes: 'Across the street from BART.', name: 'Sample' },
+    { tracker: 'Stay', link: 'https://www.airbnb.com/rooms/683391371233439307', title: 'Modern Home with Movie Theater', bedrooms: '4', beds: '4', baths: '3', sleeps: '8', area: 'Daly City', notes: 'Snack bar and home theater.', name: 'Sample' },
+    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/1114748488486103618', name: 'Jay', status: 'yes' },
+    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/1114748488486103618', name: 'Mia', status: 'yes' },
+    { tracker: 'Stay vote', link: 'https://www.airbnb.com/rooms/692737389034014743', name: 'Ray', status: 'yes' }
+  ];
+  let houses = [], view = 'cards', sortBy = 'votes';
+  const picked = new Set();
+  const lid = u => { const s = String(u || ''); const m = s.match(/airbnb\.[a-z.]+\/(?:h\/|rooms\/(?:plus\/)?)([\w-]+)/i); return m ? 'abnb:' + m[1].toLowerCase() : s.trim().toLowerCase().split(/[?#]/)[0].replace(/\/$/, ''); };
+  const cleanLink = u => { const s = String(u || '').trim(); const m = s.match(/^(https?:\/\/[^?#]+)/i); return m ? m[1] : s; };
+  const num = s => { const n = parseFloat(String(s || '').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : n; };
+  const sized = (u, w) => /muscache\.com/.test(u) ? u.split('?')[0] + '?im_w=' + w : u;
+  const photosOf = h => [h.photo].concat(String(h.photos || '').split(/[\s,]+/)).map(s => (s || '').trim()).filter(s => /^https?:\/\//.test(s)).filter((v, i, a) => a.indexOf(v) === i);
+
+  function build(rows) {
+    const stays = new Map(), votes = new Map();
+    rows.forEach(r => {
+      const t = (r.tracker || '').toLowerCase();
+      if (t === 'stay' || t === 'stays' || t === 'house') { if (r.link) { const k = lid(r.link); stays.set(k, Object.assign({}, stays.get(k) || {}, r, { key: k })); } }
+      else if (t.includes('vote') && r.link && r.name) votes.set(lid(r.link) + '|' + r.name.trim().toLowerCase(), r);
+    });
+    stays.forEach(h => { h.voters = []; });
+    votes.forEach(v => { const h = stays.get(lid(v.link)); if (h && !/^(no|remove)/i.test(v.status || 'yes')) h.voters.push(v.name.trim()); });
+    return [...stays.values()];
+  }
+  function sorted() {
+    const by = { votes: (a, b) => b.voters.length - a.voters.length || (num(a.price) ?? 1e9) - (num(b.price) ?? 1e9),
+                 price: (a, b) => (num(a.price) ?? 1e9) - (num(b.price) ?? 1e9), beds: (a, b) => (num(b.beds) ?? 0) - (num(a.beds) ?? 0) };
+    return houses.slice().sort(by[sortBy]);
+  }
+  const me = () => (store.get('cousins-name') || '').toLowerCase();
+  function render() {
+    const list = sorted(), box = $('list');
+    if (!list.length) { box.innerHTML = '<div class="empty">No houses yet. Add the first one below.</div>'; updateBar(); return; }
+    const top = Math.max(...list.map(h => h.voters.length));
+    if (view === 'cards') {
+      box.innerHTML = '<div class="cards">' + list.map(h => {
+        const ph = photosOf(h), mine = h.voters.some(v => v.toLowerCase() === me());
+        return '<article class="card' + (picked.has(h.key) ? ' pick' : '') + '">' +
+          '<button class="shot" type="button" data-view="' + esc(h.key) + '" aria-label="See photos of ' + esc(h.title || 'this house') + '">' +
+            (ph[0] ? '<img src="' + esc(sized(ph[0], 720)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="ph">No photo yet</span>') +
+            (top > 0 && h.voters.length === top ? '<span class="lead-badge">Family favorite</span>' : '') +
+            (ph.length > 1 ? '<span class="count">' + ph.length + ' photos</span>' : '') + '</button>' +
+          '<div class="body"><h3>' + esc(h.title || 'Untitled house') + '</h3>' +
+            (h.area ? '<div class="meta">' + esc(h.area) + '</div>' : '') +
+            (h.price || h.total ? '<div class="price">' + esc(h.price || h.total) + ' <small>' + (h.price ? 'a night' : 'total') + (h.price && h.total ? ' · ' + esc(h.total) + ' total' : '') + '</small></div>' : '') +
+            '<div class="chips">' + [['sleeps', 'Sleeps '], ['bedrooms', '', ' bedrooms'], ['beds', '', ' beds'], ['baths', '', ' baths']].filter(([k]) => h[k]).map(([k, a, z]) => '<span class="chip gold">' + a + esc(h[k]) + (z || '') + '</span>').join('') + '</div>' +
+            (h.notes ? '<div class="note">' + esc(h.notes) + '</div>' : '') +
+            '<div class="votes"><b>' + h.voters.length + '</b>' + (h.voters.length ? esc(h.voters.join(', ')) : 'No votes yet') + '</div>' +
+            '<div class="actions"><button class="btn small' + (mine ? ' on' : '') + '" type="button" data-vote="' + esc(h.key) + '" aria-pressed="' + mine + '">' + (mine ? '✓ Voted' : 'Vote') + '</button>' +
+            '<button class="btn small ghost" type="button" data-pick="' + esc(h.key) + '" aria-pressed="' + picked.has(h.key) + '">' + (picked.has(h.key) ? '✓ Comparing' : '+ Compare') + '</button>' +
+            '<a class="btn small ghost" href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">Airbnb ↗</a></div>' +
+          '</div></article>'; }).join('') + '</div>';
+    } else {
+      const set = picked.size >= 2 ? list.filter(h => picked.has(h.key)) : list;
+      const best = (k, hi) => { const v = set.map(h => num(h[k])).filter(x => x != null); return v.length > 1 ? (hi ? Math.max(...v) : Math.min(...v)) : null; };
+      const rows = [['Photo', h => { const p = photosOf(h)[0]; return p ? '<button class="shot" type="button" data-view="' + esc(h.key) + '" style="border-radius:10px;overflow:hidden;max-width:220px"><img class="cmpimg" src="' + esc(sized(p, 480)) + '" alt="See photos" referrerpolicy="no-referrer"></button>' : '—'; }],
+        ['Votes', h => h.voters.length + (h.voters.length ? '<div class="note">' + esc(h.voters.join(', ')) + '</div>' : ''), 'votes'],
+        ['Per night', h => esc(h.price || '—'), 'price'], ['Total', h => esc(h.total || '—'), 'total'],
+        ['Sleeps', h => esc(h.sleeps || '—'), 'sleeps'], ['Bedrooms', h => esc(h.bedrooms || '—'), 'bedrooms'], ['Beds', h => esc(h.beds || '—'), 'beds'], ['Baths', h => esc(h.baths || '—'), 'baths'],
+        ['Area', h => esc(h.area || '—')], ['Stands out', h => esc(h.notes || '—')],
+        ['Listing', h => '<a href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">Airbnb ↗</a>']];
+      const hiKeys = { votes: 1, sleeps: 1, bedrooms: 1, beds: 1, baths: 1 }, bests = {};
+      ['votes', 'price', 'total', 'sleeps', 'bedrooms', 'beds', 'baths'].forEach(k => { bests[k] = k === 'votes' ? (set.length > 1 ? Math.max(...set.map(h => h.voters.length)) : null) : best(k, hiKeys[k]); });
+      const isBest = (h, k) => k && bests[k] != null && (k === 'votes' ? h.voters.length === bests[k] && bests[k] > 0 : num(h[k]) === bests[k]);
+      box.innerHTML = (picked.size >= 2 ? '' : '<p class="note" style="margin:0 0 10px">Showing every house. Tap + Compare on 2 or more cards to stack just those.</p>') +
+        '<div class="cmpwrap"><table class="cmp"><tr><th scope="row">House</th>' + set.map(h => '<td class="name">' + esc(h.title || 'Untitled') + '</td>').join('') + '</tr>' +
+        rows.map(([label, f, k]) => '<tr><th scope="row">' + label + '</th>' + set.map(h => '<td' + (isBest(h, k) ? ' class="best"' : '') + '>' + f(h) + '</td>').join('') + '</tr>').join('') +
+        '</table></div><p class="note">Gold marks the best in each row: lowest price, most room, most votes.</p>';
+    }
+    updateBar();
+  }
+  function updateBar() {
+    $('cmpBar').hidden = !(view === 'cards' && picked.size >= 2);
+    $('cmpGo').textContent = 'Compare ' + picked.size + ' side by side';
+  }
+  const setView = v => { view = v; $('vCards').setAttribute('aria-pressed', v === 'cards'); $('vCompare').setAttribute('aria-pressed', v === 'compare'); render(); };
+  $('vCards').addEventListener('click', () => setView('cards')); $('vCompare').addEventListener('click', () => setView('compare'));
+  $('cmpGo').addEventListener('click', () => { setView('compare'); $('hList').scrollIntoView({ behavior: 'smooth' }); });
+  document.querySelectorAll('[data-sort]').forEach(b => b.addEventListener('click', () => { sortBy = b.dataset.sort; document.querySelectorAll('[data-sort]').forEach(x => x.setAttribute('aria-pressed', x === b)); render(); }));
+  $('jumpAdd').addEventListener('click', () => { $('addSec').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => $('sForm').elements.link.focus({ preventScroll: true }), 500); });
+
+  /* voting: one per person per house; tap again to take it back */
+  function vote(h) {
+    askName(name => {
+      const mine = h.voters.some(v => v.toLowerCase() === name.toLowerCase());
+      const go = yes => {
+        if (!connected) { pop({ kind: 'dup', title: 'Preview mode', msg: 'Voting turns on once the tracker form is connected.' }); return; }
+        submit({ tracker: 'Stay vote', link: cleanLink(h.link), name, status: yes ? 'yes' : 'no' }).then(() => {
+          h.voters = h.voters.filter(v => v.toLowerCase() !== name.toLowerCase()); if (yes) h.voters.push(name); render();
+          pop({ kind: 'ok', title: yes ? 'Vote counted' : 'Vote removed', msg: yes ? 'Thanks, ' + name + '! You can vote for as many houses as you like.' : 'Your vote for ' + (h.title || 'this house') + ' is off.' });
+        }).catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }));
+      };
+      if (mine) pop({ kind: 'dup', title: 'Already voted', msg: name + ', you already voted for ' + (h.title || 'this house') + '.', buttons: [{ label: 'Keep my vote' }, { label: 'Remove my vote', ghost: true, onClick: () => { setTimeout(() => go(false), 200); } }] });
+      else go(true);
+    });
+  }
+  document.addEventListener('click', e => {
+    const v = e.target.closest('[data-vote]'), p = e.target.closest('[data-pick]'), s = e.target.closest('[data-view]');
+    const find = k => houses.find(h => h.key === k);
+    if (v) vote(find(v.dataset.vote));
+    else if (p) { const k = p.dataset.pick; picked.has(k) ? picked.delete(k) : picked.add(k); render(); }
+    else if (s) openViewer(find(s.dataset.view));
+  });
+
+  /* photo viewer: stays on this page */
+  let vBack;
+  function openViewer(h) {
+    const ph = photosOf(h); if (!ph.length) { pop({ kind: 'dup', title: 'No photos yet', msg: 'Add photo links to this house and they’ll show here.' }); return; }
+    vBack = document.activeElement;
+    $('vTitle').textContent = h.title || 'Photos';
+    $('vTrack').innerHTML = ph.map((u, i) => '<figure><img src="' + esc(sized(u, 1200)) + '" alt="Photo ' + (i + 1) + ' of ' + ph.length + '" referrerpolicy="no-referrer"></figure>').join('');
+    $('vOpen').href = cleanLink(h.link);
+    const upd = () => { const i = Math.round($('vTrack').scrollLeft / Math.max(1, $('vTrack').clientWidth)); $('vCount').textContent = (i + 1) + ' of ' + ph.length + (ph.length > 1 ? ' · swipe for more' : ''); };
+    $('vTrack').onscroll = upd; $('viewer').hidden = false; $('vTrack').scrollLeft = 0; upd(); document.body.style.overflow = 'hidden'; $('vClose').focus();
+  }
+  function closeViewer() { $('viewer').hidden = true; document.body.style.overflow = ''; vBack && vBack.focus(); }
+  $('vClose').addEventListener('click', closeViewer);
+  $('viewer').addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeViewer();
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const t = $('vTrack'); t.scrollBy({ left: (e.key === 'ArrowRight' ? 1 : -1) * t.clientWidth, behavior: 'smooth' }); }
+  });
+
+  /* add a house: grab the cover photo from the link */
+  const form = $('sForm'), F = form.elements;
+  if (store.get('cousins-name')) F.name.value = store.get('cousins-name');
+  let lastLookup = '';
+  function lookup() {
+    const u = cleanLink(F.link.value); if (!/^https?:\/\//.test(u) || u === lastLookup) return; lastLookup = u;
+    const dup = houses.find(h => h.key === lid(u));
+    if (dup) { pop({ kind: 'dup', title: 'Already added', msg: (dup.title || 'That house') + ' is already on the list' + (dup.name && dup.name !== 'Sample' ? ' (added by ' + dup.name + ')' : '') + '.', buttons: [{ label: 'See it', onClick: () => { setTimeout(() => openViewer(dup), 200); } }, { label: 'OK', ghost: true }] }); return; }
+    $('preview').innerHTML = '<div class="note">Getting the cover photo…</div>';
+    fetch('https://api.microlink.io/?url=' + encodeURIComponent(u)).then(r => r.json()).then(j => {
+      if (cleanLink(F.link.value) !== u) return;
+      const img = j && j.status === 'success' && j.data && j.data.image && j.data.image.url;
+      F.photo.value = img || '';
+      $('preview').innerHTML = img ? '<div class="preview"><img src="' + esc(sized(img, 480)) + '" alt="Cover photo" referrerpolicy="no-referrer"><div class="note">Got the cover photo. Add the name and details from the listing below.</div></div>'
+                                   : '<div class="note">Couldn’t grab a photo from that link. You can paste photo links under More photos.</div>';
+    }).catch(() => { $('preview').innerHTML = '<div class="note">Couldn’t grab a photo right now. You can paste photo links under More photos.</div>'; });
+  }
+  F.link.addEventListener('change', lookup); F.link.addEventListener('paste', () => setTimeout(lookup, 50)); F.link.addEventListener('blur', lookup);
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(form).entries());
+    f.link = cleanLink(f.link);
+    if (!f.name) f.name = store.get('cousins-name') || '';
+    if (!/^https?:\/\//.test(f.link)) { pop({ kind: 'err', title: 'Link first', msg: 'Paste the Airbnb link for the house.' }); F.link.focus(); return; }
+    if (!f.title.trim()) { pop({ kind: 'err', title: 'Name it', msg: 'Give the house a short name so everyone can tell them apart.' }); F.title.focus(); return; }
+    const dup = houses.find(h => h.key === lid(f.link));
+    if (dup) { pop({ kind: 'dup', title: 'Already added', msg: (dup.title || 'That house') + ' is already on the list. Vote for it instead.' }); return; }
+    if (!connected) { pop({ kind: 'dup', title: 'Preview mode', msg: 'The tracker form isn’t connected yet, so this house wasn’t saved.' }); return; }
+    submit(Object.assign({ tracker: 'Stay' }, f)).then(() => {
+      if (f.name) store.set('cousins-name', f.name.trim());
+      const h = Object.assign({ tracker: 'Stay', key: lid(f.link), voters: [] }, f); houses.push(h); render();
+      pop({ kind: 'ok', title: 'House added', msg: (f.title || 'It') + ' is on the list. Everyone sees it in a minute or two.' });
+      form.reset(); $('preview').innerHTML = ''; lastLookup = ''; if (f.name) F.name.value = f.name;
+    }).catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }));
+  });
+
+  load().then(rows => { $('sampleTag').hidden = connected; houses = build(rows || SAMPLE); render(); })
+        .catch(() => { houses = []; render(); });
+  render();
+})();
+</script>
+</body>
+</html>

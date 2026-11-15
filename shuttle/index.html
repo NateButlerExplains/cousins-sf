@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#120B27">
+<title>Shuttle Tracker · Cousins Trip</title>
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../tracker.css">
+<style>
+  .window { padding: 18px; border-radius: 20px; background: linear-gradient(135deg, #FFC857, #FF9A45); color: #120B27; }
+  .window b { display: block; font: 400 30px/1.02 Bebas; letter-spacing: .04em; }
+  .window span { display: block; font: 500 15px/1.45 DM; margin-top: 6px; }
+  .window .out { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .window .out i { flex-basis: 100%; font: 700 11px/1 DM; font-style: normal; letter-spacing: .14em; text-transform: uppercase; }
+  .window .out em { font-style: normal; padding: 4px 9px; border-radius: 999px; background: rgba(18,11,39,.85); color: #fff; font: 700 12px/1.2 DM; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .checks li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1.5px solid var(--line); font: 500 14px/1.4 DM; }
+  .checks li::before { content: '\2713'; flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: var(--night); display: grid; place-items: center; font: 700 13px/1 DM; }
+  .co .status { align-self: flex-start; }
+  .vehicle { font: 700 13px/1.3 DM; color: var(--teal); letter-spacing: .04em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="ibtn" href="../" aria-label="Back to the main trip site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg></a>
+  </div>
+  <header class="hero">
+    <div class="bg" style="background-image:url(../img/bridge.jpg)"></div><div class="shade"></div>
+    <div>
+      <div class="kick">SFO to the house and back</div>
+      <div class="script">Shuttle</div>
+      <div class="huge">Tracker</div>
+      <p class="lead">One ride for the whole crew. Collect quotes here, compare them side by side, and line pickups up with everyone’s flights.</p>
+      <div class="sample" id="sampleTag" hidden>Sample quotes · real ones show up once the form is connected</div>
+    </div>
+  </header>
+
+  <section class="sec" aria-labelledby="hWin">
+    <h2 id="hWin">Shuttle window</h2>
+    <p class="sub">From the flights everyone added on the main site. Book pickups around the biggest group.</p>
+    <div id="window"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="hQuotes">
+    <h2 id="hQuotes">Quotes</h2>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="vCards" aria-pressed="true">Cards</button><button type="button" id="vCompare" aria-pressed="false">Compare</button>
+      </div>
+      <button class="btn small ghost" type="button" id="jumpAdd">+ Add a quote</button>
+    </div>
+    <div id="quotes"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="hAsk">
+    <h2 id="hAsk">Ask every company</h2>
+    <p class="sub">So the quotes are apples to apples.</p>
+    <ul class="checks">
+      <li>Round-trip airport transportation: SFO to the house, and the house back to SFO</li>
+      <li>A 20–27 passenger shuttle bus, so there’s real room for everyone’s suitcases plus carry-ons</li>
+      <li>Flight tracking in case a flight is delayed</li>
+      <li>Pickup at SFO and the return pickup at the house</li>
+      <li>One all-in price: every fee, gratuity and waiting time included</li>
+    </ul>
+  </section>
+
+  <section class="sec" aria-labelledby="hCos">
+    <h2 id="hCos">Companies to call</h2>
+    <p class="sub">Bay Area providers the organizer suggested. Status updates as quotes come in.</p>
+    <div class="cards" id="companies"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="hAdd" id="addSec">
+    <h2 id="hAdd">Add or update a quote</h2>
+    <p class="sub">Same company name again replaces the old quote.</p>
+    <form class="form" id="qForm" novalidate>
+      <div class="grid2">
+        <label class="f">Company<input class="field" name="title" list="coList" required placeholder="Allied Limos"></label>
+        <label class="f">Vehicle<input class="field" name="vehicle" placeholder="27-passenger shuttle bus"></label>
+      </div>
+      <datalist id="coList"></datalist>
+      <div class="grid3">
+        <label class="f">Seats<input class="field" name="seats" inputmode="numeric" placeholder="27"></label>
+        <label class="f">All-in price<input class="field" name="total" inputmode="decimal" placeholder="$1,450"></label>
+        <label class="f">Status<select class="field" name="status"><option>Asked</option><option>Quoted</option><option>Booked</option><option>Passed</option></select></label>
+        <label class="f">Flight tracking<select class="field" name="tracking"><option value="">Not sure</option><option>Yes</option><option>No</option></select></label>
+        <label class="f">Fees &amp; tip included<select class="field" name="fees"><option value="">Not sure</option><option>Yes</option><option>No</option></select></label>
+        <label class="f">Luggage<input class="field" name="luggage" placeholder="Full suitcases + carry-ons"></label>
+      </div>
+      <label class="f">Website or quote link<input class="field" name="link" type="url" inputmode="url" placeholder="https://"></label>
+      <label class="f">Notes<textarea class="field" name="notes" placeholder="Deposit, cancellation, round trip details…"></textarea></label>
+      <label class="f">Your first name<input class="field" name="name" autocomplete="given-name"></label>
+      <button class="btn" type="submit">Save quote</button>
+    </form>
+  </section>
+</div>
+
+<script src="../config.js"></script>
+<script src="../tracker.js"></script>
+<script>
+(function () {
+  const { $, esc, store, connected, load, submit, pop, gate, adminBar, C } = window.TRK;
+  gate(); adminBar('shuttle');
+
+  const COMPANIES = [
+    { title: 'MGL Limo – Executive Black Car', where: 'Burlingame', what: 'Sprinter vans and larger executive transportation.' },
+    { title: 'Coach 21', where: 'Burlingame', what: 'Charter transportation and group transfers.' },
+    { title: 'Allied Limos', where: 'Burlingame', what: '14-passenger Sprinter and 27-passenger shuttle bus.' }
+  ];
+  const SAMPLE = [
+    { tracker: 'Shuttle quote', title: 'Allied Limos', vehicle: '27-passenger shuttle bus', seats: '27', total: '$1,450', tracking: 'Yes', fees: 'Yes', luggage: 'Full rear luggage bay', status: 'Quoted', notes: 'Round trip. 50% deposit.' },
+    { tracker: 'Shuttle quote', title: 'MGL Limo – Executive Black Car', vehicle: 'Two Sprinter vans', seats: '28', total: '$1,700', tracking: 'Yes', fees: 'No', luggage: 'Tight with big suitcases', status: 'Quoted', notes: 'Gratuity 20% extra.' },
+    { tracker: 'Shuttle quote', title: 'Coach 21', vehicle: '', seats: '', total: '', tracking: '', fees: '', luggage: '', status: 'Asked', notes: 'Left a message.' }
+  ];
+  let quotes = [], view = 'cards';
+  const key = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const money = s => { const n = parseFloat(String(s || '').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : n; };
+  const statusChip = s => '<span class="chip status ' + ({ Booked: 'teal', Quoted: 'gold', Passed: 'coral' }[s] || '') + '">' + esc(s || 'Not contacted yet') + '</span>';
+  const yn = v => v === 'Yes' ? '<span class="chip teal">✓ ' : v === 'No' ? '<span class="chip coral">✗ ' : '<span class="chip">? ';
+
+  function latestByCompany(rows) {
+    const m = new Map(); rows.forEach(r => { if (r.title) m.set(key(r.title), r); }); return [...m.values()];
+  }
+  function renderQuotes() {
+    const box = $('quotes');
+    if (!quotes.length) { box.innerHTML = '<div class="empty">No quotes yet. Call a company below, then add what they said.</div>'; return; }
+    const sorted = quotes.slice().sort((a, b) => (money(a.total) ?? 1e9) - (money(b.total) ?? 1e9));
+    const cheapest = sorted.find(q => money(q.total) != null);
+    if (view === 'cards') {
+      box.innerHTML = '<div class="cards">' + sorted.map(q => '<article class="card' + (q.status === 'Booked' ? ' pick' : '') + '"><div class="body">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>' + esc(q.title) + '</h3>' + statusChip(q.status) + '</div>' +
+        (q.vehicle ? '<div class="vehicle">' + esc(q.vehicle) + (q.seats ? ' · ' + esc(q.seats) + ' seats' : '') + '</div>' : '') +
+        (money(q.total) != null ? '<div class="price">' + esc(q.total) + ' <small>all in, round trip' + (q === cheapest && quotes.filter(x => money(x.total) != null).length > 1 ? ' · lowest' : '') + '</small></div>' : '') +
+        '<div class="chips">' + yn(q.tracking) + 'Flight tracking</span>' + yn(q.fees) + 'Fees &amp; tip included</span>' + (q.luggage ? '<span class="chip">' + esc(q.luggage) + '</span>' : '') + '</div>' +
+        (q.notes ? '<div class="note">' + esc(q.notes) + '</div>' : '') +
+        '<div class="actions">' + (q.link ? '<a class="btn small ghost" href="' + esc(q.link) + '" target="_blank" rel="noopener">Website ↗</a>' : '') +
+        '<button class="btn small ghost" type="button" data-edit="' + esc(q.title) + '">Update</button></div></div></article>').join('') + '</div>';
+    } else {
+      const rows = [['Status', q => statusChip(q.status)], ['Vehicle', q => esc(q.vehicle || '—')], ['Seats', q => esc(q.seats || '—')],
+        ['All-in price', q => esc(q.total || '—'), q => cheapest && q === cheapest],
+        ['Flight tracking', q => esc(q.tracking || 'Not sure'), q => q.tracking === 'Yes'], ['Fees &amp; tip incl.', q => esc(q.fees || 'Not sure'), q => q.fees === 'Yes'],
+        ['Luggage', q => esc(q.luggage || '—')], ['Notes', q => esc(q.notes || '—')]];
+      box.innerHTML = '<div class="cmpwrap"><table class="cmp"><tr><th scope="row">Company</th>' + sorted.map(q => '<td class="name">' + esc(q.title) + '</td>').join('') + '</tr>' +
+        rows.map(([label, f, best]) => '<tr><th scope="row">' + label + '</th>' + sorted.map(q => '<td' + (best && best(q) ? ' class="best"' : '') + '>' + f(q) + '</td>').join('') + '</tr>').join('') + '</table></div>' +
+        '<p class="note">Gold marks the lowest price and the yeses you want.</p>';
+    }
+  }
+  function renderCompanies() {
+    const byKey = new Map(quotes.map(q => [key(q.title), q]));
+    $('companies').innerHTML = COMPANIES.map(c => { const q = byKey.get(key(c.title));
+      return '<article class="card co"><div class="body"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>' + esc(c.title) + '</h3>' + statusChip(q && q.status) + '</div>' +
+        '<div class="meta">' + esc(c.where) + ' · ' + esc(c.what) + '</div><div class="actions"><button class="btn small ghost" type="button" data-edit="' + esc(c.title) + '">' + (q ? 'Update quote' : 'Add quote') + '</button></div></div></article>'; }).join('');
+    $('coList').innerHTML = COMPANIES.map(c => '<option value="' + esc(c.title) + '">').join('');
+  }
+  function edit(title) {
+    const f = $('qForm').elements, q = quotes.find(x => key(x.title) === key(title));
+    f.title.value = title;
+    ['vehicle', 'seats', 'total', 'luggage', 'link', 'notes'].forEach(k => { f[k].value = q ? (q[k] || '') : ''; });
+    ['status', 'tracking', 'fees'].forEach(k => { f[k].value = q ? (q[k] || '') : (k === 'status' ? 'Asked' : ''); });
+    $('addSec').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => f.vehicle.focus({ preventScroll: true }), 500);
+  }
+  document.addEventListener('click', e => { const b = e.target.closest('[data-edit]'); if (b) edit(b.dataset.edit); });
+  $('jumpAdd').addEventListener('click', () => { $('qForm').reset(); $('addSec').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => $('qForm').elements.title.focus({ preventScroll: true }), 500); });
+  const setView = v => { view = v; $('vCards').setAttribute('aria-pressed', v === 'cards'); $('vCompare').setAttribute('aria-pressed', v === 'compare'); renderQuotes(); };
+  $('vCards').addEventListener('click', () => setView('cards')); $('vCompare').addEventListener('click', () => setView('compare'));
+  const saved = store.get('cousins-name'); if (saved) $('qForm').elements.name.value = saved;
+
+  $('qForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target).entries());
+    if (!f.title.trim()) { pop({ kind: 'err', title: 'Company first', msg: 'Add the company name so the quote has a home.' }); return; }
+    if (!connected) { pop({ kind: 'dup', title: 'Preview mode', msg: 'The tracker form isn’t connected yet, so this quote wasn’t saved.' }); return; }
+    const existing = quotes.find(q => key(q.title) === key(f.title));
+    const send = () => submit(Object.assign({ tracker: 'Shuttle quote' }, f)).then(() => {
+      if (f.name) store.set('cousins-name', f.name.trim());
+      const q = Object.assign({ tracker: 'Shuttle quote' }, f); quotes = quotes.filter(x => key(x.title) !== key(f.title)).concat(q); renderQuotes(); renderCompanies();
+      pop({ kind: 'ok', title: existing ? 'Quote updated' : 'Quote saved', msg: f.title + ' is on the board. Everyone sees it in a minute or two.' });
+      e.target.reset(); if (f.name) e.target.elements.name.value = f.name;
+    }).catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }));
+    if (existing) pop({ kind: 'dup', title: 'Already have one', msg: 'There’s already a quote for ' + existing.title + '. Saving replaces it.', buttons: [{ label: 'Replace it', onClick: send }, { label: 'Cancel', ghost: true }] });
+    else send();
+  });
+
+  /* shuttle window from the flights sheet */
+  const DAYS = ['Wed Jul 21', 'Thu Jul 22', 'Fri Jul 23', 'Sat Jul 24', 'Sun Jul 25', 'Mon Jul 26'];
+  const dayIdx = d => { const m = String(d || '').match(/(?:\b7\/|\b)(2[1-6])\b/); return m ? +m[1] - 21 : -1; };
+  const mins = t => { const m = String(t || '').trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?/); if (!m) return null; let h = +m[1], mi = +(m[2] || 0); if (m[3]) { const pm = m[3][0] === 'p'; if (h === 12) h = 0; if (pm) h += 12; } return h * 60 + mi; };
+  const clock = x => { x = ((x % 1440) + 1440) % 1440; let h = Math.floor(x / 60), m = x % 60, ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + String(m).padStart(2, '0') + ' ' + ap; };
+  function flights() {
+    const F = C.flights || {}; if (!F.csv) return Promise.resolve([]);
+    return fetch(F.csv + (F.csv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
+      const lines = t.split(/\r?\n/).filter(Boolean); if (!lines.length) return [];
+      const split = l => { const out = []; let cur = '', q = false; for (let i = 0; i < l.length; i++) { const c = l[i]; if (q) { if (c === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; } else if (c === '"') q = true; else if (c === ',') { out.push(cur); cur = ''; } else cur += c; } out.push(cur); return out; };
+      const head = split(lines[0]).map(h => h.trim().toLowerCase());
+      const col = p => head.findIndex(h => h.startsWith(p));
+      const ci = { name: col('first name'), ap: col('arriving airport'), d: col('arrival date'), t: col('arrival time') };
+      const latest = new Map();
+      lines.slice(1).forEach(l => { const r = split(l); const n = (r[ci.name] || '').trim(); if (n) latest.set(n.toLowerCase(), { name: n, ap: ((r[ci.ap] || '').toUpperCase().match(/SFO|OAK|SJC/) || [''])[0], d: dayIdx(r[ci.d]), t: mins(r[ci.t]) }); });
+      return [...latest.values()].filter(x => x.ap && x.d >= 0 && x.t != null);
+    }).catch(() => []);
+  }
+  function renderWindow(list) {
+    if (!list.length) { $('window').innerHTML = '<div class="empty">No flights added yet. As family add their flights on the main site, the best pickup window shows up here.</div>'; return; }
+    const items = list.map(x => Object.assign(x, { abs: x.d * 1440 + x.t })).sort((a, b) => a.abs - b.abs);
+    const groups = [];
+    items.forEach(x => { const g = groups.find(g => g.ap === x.ap && g.d === x.d && x.abs - g.first <= 90); if (g) { g.items.push(x); g.last = x.abs; } else groups.push({ ap: x.ap, d: x.d, first: x.abs, last: x.abs, items: [x] }); });
+    const best = groups.slice().sort((a, b) => b.items.length - a.items.length || a.first - b.first)[0];
+    const out = []; groups.forEach(g => { if (g !== best) g.items.forEach(x => out.push(x.name + ' (' + g.ap + ', ' + DAYS[g.d].replace(/ Jul /, ' ') + ' ' + clock(x.t) + ')')); });
+    $('window').innerHTML = '<div class="window"><b>' + best.ap + ', ' + DAYS[best.d] + ', ' + clock(best.first) + (best.last > best.first ? '–' + clock(best.last) : '') + '</b>' +
+      '<span>' + (out.length ? 'One shuttle here covers ' + esc(best.items.map(x => x.name).join(', ')) + '. Tell companies the last landing time, plus about 30 minutes for bags.' : 'Everyone so far lands in this window, so one shuttle can bring the whole crew. Ask for pickup about 30 minutes after the last landing.') + '</span>' +
+      (out.length ? '<div class="out"><i>Outside the window</i>' + out.map(o => '<em>' + esc(o) + '</em>').join('') + '</div>' : '') + '</div>';
+  }
+
+  load().then(rows => {
+    $('sampleTag').hidden = connected;
+    quotes = latestByCompany((rows || SAMPLE).filter(r => /shuttle/i.test(r.tracker || '')));
+    renderQuotes(); renderCompanies();
+  }).catch(() => { quotes = []; renderQuotes(); renderCompanies(); });
+  renderQuotes(); renderCompanies();
+  flights().then(renderWindow);
+})();
+</script>
+</body>
+</html>
