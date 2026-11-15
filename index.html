@@ -454,7 +454,7 @@
   mb.addEventListener('click', () => {
     if (embed) {
       if (!mp.hidden) { closePlayer(); return; }
-      $('mFrame').innerHTML = '<iframe src="' + embed + '" title="Trip mix" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+      $('mFrame').innerHTML = '<iframe src="' + embed + '" title="Trip mix" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
       mp.hidden = false; setOn(true);
       return;
     }
