@@ -7,7 +7,7 @@ window.TRIP_CONFIG = {
   // Published CSV link of the Vote form's response sheet (for live results).
   voteCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ56-b6bSvNMjGKDfEfGOuudO_fY9DyCHWumt6JIpsJ0DZL3RVcBo1LpMjYyKbWPYeNjRVKcUVxLZpw/pub?gid=749772490&single=true&output=csv',
   // YouTube Music playlist link.
-  playlistUrl: '',
+  playlistUrl: 'https://youtu.be/sIQMnh5teuI?si=zaOkGLneMNseAWnn',
   // Google Photos shared album link, for after the trip.
   photosUrl: '',
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
