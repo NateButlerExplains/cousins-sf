@@ -126,6 +126,42 @@
           display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(6px); }
   .ibtn svg { width: 20px; height: 20px; }
   .ibtn.on { background: var(--gold); color: var(--night); border-color: var(--gold); }
+  /* confirmation pop-up */
+  .pop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgba(8,5,20,.6); backdrop-filter: blur(4px);
+         opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .pop.show { opacity: 1; pointer-events: auto; }
+  .popcard { width: min(340px, 100%); padding: 26px 22px 20px; border-radius: 22px; background: #1A1033; border: 1.5px solid var(--gold); text-align: center;
+             box-shadow: 0 24px 60px rgba(0,0,0,.6); transform: scale(.92); transition: transform .25s cubic-bezier(.2,.9,.3,1.3); }
+  .pop.show .popcard { transform: none; }
+  .popicon { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; font: 700 34px/1 DM; }
+  .popicon.ok { background: var(--teal); color: #120B27; }
+  .popicon.dup { background: var(--gold); color: #120B27; }
+  .popicon.err { background: var(--coral); color: #120B27; }
+  .poptitle { font: 400 34px/1 Anton; color: #fff; text-transform: uppercase; letter-spacing: .01em; }
+  .popmsg { font: 500 15px/1.45 DM; color: var(--mute); margin: 10px 0 18px; }
+  .popbtns { display: grid; gap: 8px; }
+  .popbtn { min-height: 46px; border-radius: 999px; border: 0; background: var(--gold); color: #120B27; font: 400 22px/1 Bebas; letter-spacing: .08em; cursor: pointer; }
+  .popbtn.ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.35); }
+  .popbtn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  /* cruise comparison */
+  .compare { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 2%; margin-top: 2%; text-align: left; }
+  .compare div { padding: 3% 3.5%; border-radius: 12px; background: rgba(18,11,39,.72); border: 1px solid rgba(255,200,87,.35); font: 500 calc(var(--W) * .027)/1.35 DM; color: #fff; }
+  .compare b { display: block; font: 400 calc(var(--W) * .04)/1 Bebas; letter-spacing: .08em; color: var(--gold); margin-bottom: 3%; }
+  .compare ul { margin: 0; padding-left: 1.1em; }
+  .compare li + li { margin-top: 2%; }
+  .cdesc { display: block; margin-top: 4px; font: 500 calc(var(--W) * .027)/1.3 DM; letter-spacing: 0; text-transform: none; opacity: .9; }
+  .bothnote { width: 100%; font: 500 calc(var(--W) * .026)/1.3 DM; color: var(--mute); margin-top: 1.5%; text-align: center; }
+  /* photo drop */
+  .dropbtn { width: 100%; padding: 5% 4%; border-radius: 20px; border: 2px dashed var(--gold); background: rgba(255,200,87,.14); color: #fff; text-decoration: none;
+             display: flex; align-items: center; gap: 4%; margin-top: 4%; text-align: left; cursor: pointer; }
+  .dropbtn .cam { flex: none; width: calc(var(--W) * .15); height: calc(var(--W) * .15); border-radius: 50%; background: var(--gold); color: #120B27; display: grid; place-items: center; }
+  .dropbtn .cam svg { width: 55%; height: 55%; }
+  .dropbtn b { display: block; font: 400 calc(var(--W) * .075)/1 Bebas; letter-spacing: .06em; color: var(--gold); }
+  .dropbtn span { font: 500 calc(var(--W) * .032)/1.35 DM; color: var(--mute); }
+  .dropbtn[aria-disabled="true"] { opacity: .75; }
+  .steps { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2%; margin-top: 4%; }
+  .steps div { padding: 4% 3%; border-radius: 14px; background: rgba(18,11,39,.72); text-align: center; font: 500 calc(var(--W) * .028)/1.3 DM; color: #fff; }
+  .steps i { display: block; font: 400 calc(var(--W) * .07)/1 Anton; font-style: normal; color: var(--gold); margin-bottom: 4%; }
   .dots { position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 6px; z-index: 5; pointer-events: none; }
   .dots button { pointer-events: auto; width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: width .25s, background .25s; }
   .dots button.on { width: 22px; border-radius: 6px; background: var(--gold); }
@@ -184,6 +220,7 @@
 <nav class="dots" id="dots" aria-label="Pages"></nav>
 <div class="hint" id="hint">Swipe for the plan &rarr; &nbsp;&middot;&nbsp; Tap a page for details</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="pop" id="pop" role="alertdialog" aria-modal="true" aria-labelledby="popTitle" aria-describedby="popMsg" hidden><div class="popcard"><div class="popicon" id="popIcon"></div><div class="poptitle" id="popTitle"></div><div class="popmsg" id="popMsg"></div><div class="popbtns" id="popBtns"></div></div></div>
 <audio id="music" src="audio/bay-lofi.mp3" loop preload="auto"></audio>
 
 <script src="config.js"></script>
@@ -232,6 +269,22 @@
   const track = $('track'), dots = $('dots'), prev = $('prev'), next = $('next'), hint = $('hint');
   let toastT;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
+  /* pop-up confirmation: pop({ kind: 'ok'|'dup'|'err', title, msg, buttons: [{ label, ghost, onClick }] }) */
+  let popReturn;
+  function pop(o) {
+    const el = $('pop'); popReturn = document.activeElement;
+    $('popIcon').className = 'popicon ' + (o.kind || 'ok'); $('popIcon').textContent = { ok: '\u2713', dup: '!', err: '\u00d7' }[o.kind || 'ok'];
+    $('popTitle').textContent = o.title; $('popMsg').textContent = o.msg || '';
+    const btns = o.buttons || [{ label: 'Got it' }];
+    $('popBtns').innerHTML = '';
+    btns.forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.className = 'popbtn' + (b.ghost ? ' ghost' : ''); x.textContent = b.label;
+      x.addEventListener('click', () => { closePop(); b.onClick && b.onClick(); }); $('popBtns').appendChild(x); });
+    el.hidden = false; requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => $('popBtns').firstChild.focus(), 60);
+  }
+  function closePop() { const el = $('pop'); el.classList.remove('show'); setTimeout(() => { el.hidden = true; }, 200); popReturn && popReturn.focus && popReturn.focus(); }
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !$('pop').hidden) { e.stopImmediatePropagation(); closePop(); } }, true);
+  window.cousinsPop = pop;
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   const panelBg = img => '<div class="pbg" style="background-image:url(img/' + img + ')"></div><div class="pshade"></div>';
   const gcal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Cousins Trip: San Francisco') +
@@ -270,7 +323,8 @@
       '<div class="kick">YOU DECIDE</div><div class="script">Cast your</div><div class="huge">Vote</div>' +
       '<div class="qlabel">Friday dinner cruise</div>' +
       '<div class="choices two" role="group" aria-label="Friday dinner cruise" data-q="cruise">' +
-        ['Premier', 'Signature'].map(a => '<button type="button" class="choice" data-a="' + a + '" aria-pressed="false">' + a + '<small data-r="' + a + '"></small></button>').join('') + '</div>' +
+        [['Premier', '3-course plated dinner, served at your table. Soda &amp; coffee included.'], ['Signature', 'Chef\u2019s buffet: salads, mains &amp; desserts. Go back for seconds.']].map(([a, d]) => '<button type="button" class="choice" data-a="' + a + '" aria-pressed="false">' + a + '<span class="cdesc">' + d + '</span><small data-r="' + a + '"></small></button>').join('') + '</div>' +
+      '<div class="bothnote">Both: about 3 hours on the bay from Pier 3, with a DJ, dancing and a cash bar.</div>' +
       '<div class="qlabel">Saturday dinner</div>' +
       '<div class="choices two" role="group" aria-label="Saturday dinner" data-q="dinner">' +
         ['Chinatown', 'North Beach'].map(a => '<button type="button" class="choice" data-a="' + a + '" aria-pressed="false">' + a + '<small data-r="' + a + '"></small></button>').join('') + '</div>' +
@@ -279,10 +333,10 @@
       '</div>',
     photos: () =>
       '<div class="panel">' + panelBg('bg-view.jpg') +
-      '<div class="kick">AFTER THE TRIP</div><div class="script">Add your</div><div class="huge">Photos</div>' +
-      '<div class="sub">Once we’re home, everyone drops their best shots into one shared album and this page becomes our recap.</div>' +
-      '<div class="btnrow"><a class="btn" id="photosBtn" href="#" target="_blank" rel="noopener">Open the album</a></div>' +
-      '<div class="note" id="photosNote"></div>' +
+      '<div class="kick">ONE SHARED ALBUM</div><div class="script">Drop your</div><div class="huge">Photos</div>' +
+      '<a class="dropbtn" id="photosBtn" href="#" target="_blank" rel="noopener"><span class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>' +
+        '<span><b>Add photos</b><span id="photosNote">Opens the family album. Tap + and pick your shots.</span></span></a>' +
+      '<div class="steps"><div><i>1</i>Tap Add photos</div><div><i>2</i>Tap + in the album</div><div><i>3</i>Pick as many as you want</div></div>' +
       '</div>'
   };
 
@@ -378,10 +432,14 @@
     if (!name) { $('rsvpNote').textContent = 'Add your name first.'; $('rsvpName').focus(); return; }
     if (!rsvpAns) { $('rsvpNote').textContent = 'Pick one: I’m in, Maybe, or Can’t make it.'; return; }
     if (!rsvpOn) { $('rsvpNote').textContent = 'Preview mode: the RSVP form isn’t connected yet.'; return; }
+    let sent = {}; try { sent = JSON.parse(store.get('cousins-rsvp-names') || '{}'); } catch (e2) {}
+    const key = name.toLowerCase();
+    if (sent[key]) { pop({ kind: 'dup', title: 'Already sent', msg: 'We already have an answer for ' + name + ' (' + sent[key] + '). No need to send it again.' }); return; }
     submitForm(C.rsvp, { [C.rsvp.nameEntry]: name, [C.rsvp.answerEntry]: rsvpAns }).then(() => {
-      $('rsvpNote').textContent = rsvpAns === 'I’m in!' ? 'Got it, ' + name + '. See you in San Francisco!' : 'Thanks, ' + name + '. Got your answer.';
-      store.set('cousins-rsvp', rsvpAns);
-    }).catch(() => { $('rsvpNote').textContent = 'That didn’t send. Check your connection and try again.'; });
+      sent[key] = rsvpAns; store.set('cousins-rsvp-names', JSON.stringify(sent)); store.set('cousins-rsvp', rsvpAns);
+      $('rsvpNote').textContent = 'Answer sent for ' + name + '.';
+      pop({ kind: 'ok', title: rsvpAns === 'I’m in!' ? 'You’re in!' : 'Got it', msg: rsvpAns === 'I’m in!' ? 'Thanks, ' + name + '. See you in San Francisco!' : 'Thanks, ' + name + '. Your answer is in.' });
+    }).catch(() => { pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }); });
   });
   const pl = $('playlistBtn');
   if (C.playlistUrl) pl.href = C.playlistUrl;
@@ -409,16 +467,17 @@
   $('voteBtn').addEventListener('click', () => {
     if (!pick.cruise || !pick.dinner) { $('voteNote').textContent = 'Pick one for each question first.'; return; }
     if (!voteOn) { $('voteNote').textContent = 'Preview mode: voting isn’t connected yet.'; return; }
-    if (store.get('cousins-voted')) { $('voteNote').textContent = 'You already voted. Thanks!'; return; }
+    if (store.get('cousins-voted')) { pop({ kind: 'dup', title: 'Already voted', msg: 'Your vote is already in from this phone. One vote each keeps it fair.' }); return; }
     submitForm(C.vote, { [C.vote.cruiseEntry]: pick.cruise, [C.vote.dinnerEntry]: pick.dinner }).then(() => {
-      store.set('cousins-voted', '1'); $('voteNote').textContent = 'Vote locked in. Results update in about a minute.'; setTimeout(loadResults, 4000);
-    }).catch(() => { $('voteNote').textContent = 'That didn’t send. Check your connection and try again.'; });
+      store.set('cousins-voted', '1'); $('voteNote').textContent = 'Your vote is in. Results update in about a minute.'; setTimeout(loadResults, 4000);
+      pop({ kind: 'ok', title: 'Vote locked in', msg: pick.cruise + ' cruise and ' + pick.dinner + ' dinner. Results update in about a minute.' });
+    }).catch(() => { pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }); });
   });
   loadResults();
 
   const ph = $('photosBtn');
   if (C.photosUrl) ph.href = C.photosUrl;
-  else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album opens after the trip.'; ph.addEventListener('click', e => { e.preventDefault(); toast('The photo album opens after the trip.'); }); }
+  else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album link is coming soon.'; ph.addEventListener('click', e => { e.preventDefault(); pop({ kind: 'dup', title: 'Almost ready', msg: 'The shared album link is coming soon. Check back here to drop your photos.' }); }); }
 
   /* music: background audio only, no player. Starts on the visitor's first tap anywhere
      (phones block sound before that); the music icon turns it on and off and the choice is remembered. */

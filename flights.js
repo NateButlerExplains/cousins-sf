@@ -311,12 +311,26 @@
     if (!f.name.trim()) { note.textContent = 'Add your first name.'; return; }
     if (!f.arrTime) { note.textContent = 'Add the time you land.'; return; }
     if (!canSubmit) { note.textContent = 'Preview mode: the flights form isn’t connected yet.'; return; }
-    const fd = new FormData();
-    Object.entries(F.entries).forEach(([k, entry]) => { if (entry && f[k] != null && f[k] !== '') fd.append(entry, k.endsWith('Time') ? clock(mins(f[k])) : (k.endsWith('Flight') ? f[k].toUpperCase() : f[k].trim())); });
-    fetch(F.action, { method: 'POST', mode: 'no-cors', body: fd }).then(() => {
-      note.textContent = 'Got it, ' + f.name.trim() + '! The board updates in a minute or two.';
-      e.target.reset(); setTimeout(load, 5000);
-    }).catch(() => { note.textContent = 'That didn’t send. Check your connection and try again.'; });
+    const pop = window.cousinsPop || (o => { note.textContent = o.title + '. ' + (o.msg || ''); });
+    const name = f.name.trim(), key = name.toLowerCase();
+    let sent = {}; try { sent = JSON.parse(localStorage.getItem('cousins-flight-names') || '{}'); } catch (x) {}
+    const send = () => {
+      const fd = new FormData();
+      Object.entries(F.entries).forEach(([k, entry]) => { if (entry && f[k] != null && f[k] !== '') fd.append(entry, k.endsWith('Time') ? clock(mins(f[k])) : (k.endsWith('Flight') ? f[k].toUpperCase() : f[k].trim())); });
+      fetch(F.action, { method: 'POST', mode: 'no-cors', body: fd }).then(() => {
+        const updated = !!sent[key];
+        sent[key] = 1; try { localStorage.setItem('cousins-flight-names', JSON.stringify(sent)); } catch (x) {}
+        note.textContent = (updated ? 'Flight updated for ' : 'Flight added for ') + name + '.';
+        pop({ kind: 'ok', title: updated ? 'Flight updated' : 'Flight added', msg: 'Thanks, ' + name + '! The board and van runs update in a minute or two.' });
+        e.target.reset(); setTimeout(load, 5000);
+      }).catch(() => pop({ kind: 'err', title: 'Didn\u2019t send', msg: 'Check your connection and try again.' }));
+    };
+    if (sent[key]) {
+      pop({ kind: 'dup', title: 'Already sent', msg: 'We already have a flight for ' + name + '. Send this one only if your plans changed. It will replace the old one.',
+            buttons: [{ label: 'Update my flight', onClick: send }, { label: 'Cancel', ghost: true }] });
+      return;
+    }
+    send();
   });
 
   load();
