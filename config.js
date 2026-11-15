@@ -29,5 +29,5 @@ window.TRIP_CONFIG = {
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.
   passcodeHash: '30ntcz',
   // Admin password hash (same FNV-1a scheme as the passcode). Keeps casual visitors out, not real security.
-  adminHash: '1ozupbj'
+  adminHash: 'msrnx2'
 };
