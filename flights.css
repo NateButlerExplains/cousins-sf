@@ -73,3 +73,21 @@
 .fbtn { min-height: 48px; border: 0; border-radius: 999px; background: var(--gold); color: #120B27; font: 400 24px/1 Bebas; letter-spacing: .08em; cursor: pointer; margin-top: 6px; }
 .fnote { font: 500 14px/1.4 DM; color: var(--mute); min-height: 1.4em; }
 .fback { display: flex; justify-content: center; margin-top: 26px; }
+
+/* Illustrated map pieces */
+.fart { position: relative; display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+.fart svg { display: block; width: 100%; height: auto; }
+.fart b { margin-top: 2px; padding: 4px 8px 2px; border-radius: 7px; background: rgba(18,11,39,.92); color: #fff; font: 400 16px/1 Bebas; letter-spacing: .08em; white-space: nowrap; }
+.fart b i { font-style: normal; color: var(--gold); margin-left: 4px; }
+.fart.air { width: 84px; }
+.fart b small { display: block; font: 700 9px/1.3 DM; letter-spacing: .06em; color: rgba(255,255,255,.75); text-transform: uppercase; margin-top: 2px; }
+.fart.house { width: 56px; }
+.fart.house b { background: var(--gold); color: #120B27; }
+.fart.van { width: 56px; transition: transform .25s; }
+.fart.van.left { transform: scaleX(-1); }
+.fdrive { display: inline-block; padding: 3px 8px 2px; border-radius: 999px; background: #fff; border: 1.5px solid #120B27; color: #120B27; font: 400 15px/1 Bebas; letter-spacing: .06em; white-space: nowrap; }
+.fmap { height: 460px; }
+.fadd { width: 100%; min-height: 50px; margin: 0 0 12px; border: 2px dashed var(--gold); border-radius: 16px; background: rgba(255,200,87,.1); color: var(--gold);
+        font: 400 24px/1 Bebas; letter-spacing: .08em; cursor: pointer; }
+.fadd:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.fsec #fForm { scroll-margin-top: 90px; }

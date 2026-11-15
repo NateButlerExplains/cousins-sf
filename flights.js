@@ -96,6 +96,51 @@
   const houseSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>';
   const vanSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7a2 2 0 0 1 2-2h11l4 4 3 1.5V16a1 1 0 0 1-1 1h-1.2a2.8 2.8 0 0 1-5.6 0H9.8a2.8 2.8 0 0 1-5.6 0H3a1 1 0 0 1-1-1zm2 0v3h4V7zm6 0v3h4.6l-3-3zM7 15.6a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm9.2 0a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg>';
 
+
+  /* Illustrated map pieces: drawn as detailed vector art, not clip-art glyphs */
+  const VAN_ART = '<svg viewBox="0 0 132 60" aria-hidden="true">' +
+    '<defs><linearGradient id="vb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4d55"/><stop offset=".45" stop-color="#1d1f24"/><stop offset="1" stop-color="#0c0d10"/></linearGradient>' +
+    '<linearGradient id="vg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fc6e6"/><stop offset=".5" stop-color="#2c4d6b"/><stop offset="1" stop-color="#0f1e2e"/></linearGradient>' +
+    '<radialGradient id="vr"><stop offset="0" stop-color="#f4f5f7"/><stop offset=".6" stop-color="#a9adb5"/><stop offset="1" stop-color="#5d616a"/></radialGradient></defs>' +
+    '<ellipse cx="64" cy="55" rx="58" ry="4" fill="rgba(0,0,0,.35)"/>' +
+    '<path d="M6 46V12q0-6 6-6.5L86 4q5 0 8 4l12 15q2 2.5 6 3.5l10 2.5q5 1.4 5.5 6.5V46q0 3-3 3H9q-3 0-3-3z" fill="url(#vb)" stroke="#000" stroke-width="1"/>' +
+    '<path d="M8 10q30-3 78-4" stroke="rgba(255,255,255,.35)" stroke-width="1.5" fill="none"/>' +
+    '<path d="M88 9l11 14q1.4 1.8-1 1.8H88z" fill="url(#vg)" stroke="#000" stroke-width=".8"/>' +
+    '<rect x="12" y="12" width="17" height="13" rx="2" fill="url(#vg)"/><rect x="32" y="12" width="17" height="13" rx="2" fill="url(#vg)"/>' +
+    '<rect x="52" y="12" width="15" height="13" rx="2" fill="url(#vg)"/><rect x="70" y="12" width="15" height="13" rx="2" fill="url(#vg)"/>' +
+    '<path d="M50 9v38M68 9v38M86 8v39" stroke="rgba(0,0,0,.8)" stroke-width="1"/><rect x="61" y="29" width="5" height="1.6" rx=".8" fill="#888"/>' +
+    '<path d="M6 32h120" stroke="rgba(255,255,255,.12)" stroke-width="1"/>' +
+    '<path d="M118 30h6q2 0 2 2v3h-8z" fill="#fff8d6" stroke="#000" stroke-width=".6"/><rect x="6" y="20" width="3" height="9" rx="1" fill="#d22"/>' +
+    '<rect x="112" y="40" width="15" height="5" rx="1.5" fill="#2a2c31"/><rect x="5" y="40" width="10" height="5" rx="1.5" fill="#2a2c31"/>' +
+    '<path d="M17 47a13 13 0 0 1 26 0" fill="#07080a"/><path d="M89 47a13 13 0 0 1 26 0" fill="#07080a"/>' +
+    '<circle cx="30" cy="47" r="9.5" fill="#111"/><circle cx="30" cy="47" r="5.6" fill="url(#vr)"/><circle cx="30" cy="47" r="1.6" fill="#333"/>' +
+    '<circle cx="102" cy="47" r="9.5" fill="#111"/><circle cx="102" cy="47" r="5.6" fill="url(#vr)"/><circle cx="102" cy="47" r="1.6" fill="#333"/>' +
+    '</svg>';
+
+  const AIRPORT_ART = '<svg viewBox="0 0 140 84" aria-hidden="true">' +
+    '<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0f7"/><stop offset="1" stop-color="#3f6f95"/></linearGradient>' +
+    '<linearGradient id="aw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9ced6"/></linearGradient></defs>' +
+    '<ellipse cx="70" cy="79" rx="64" ry="4" fill="rgba(0,0,0,.3)"/>' +
+    '<rect x="24" y="16" width="9" height="46" fill="url(#aw)" stroke="#55606e" stroke-width=".8"/>' +
+    '<path d="M16 16h25l-3 -9H19z" fill="url(#ag)" stroke="#55606e" stroke-width=".8"/><rect x="18" y="3" width="21" height="4" rx="1" fill="#55606e"/><path d="M28.5 3V0" stroke="#55606e" stroke-width="1.2"/><circle cx="28.5" cy="0.8" r="1.2" fill="#ff4d3d"/>' +
+    '<path d="M8 76V50q55-14 124 0v26z" fill="url(#aw)" stroke="#55606e" stroke-width=".8"/>' +
+    '<path d="M14 72V54q50-10 112 0v18z" fill="url(#ag)"/>' +
+    '<path d="M30 52v20M46 50v22M62 49v23M78 49v23M94 50v22M110 52v20M14 63h112" stroke="rgba(255,255,255,.7)" stroke-width="1"/>' +
+    '<path d="M6 50q64-18 128 0" stroke="#55606e" stroke-width="2.4" fill="none"/>' +
+    '<g transform="translate(76 24) rotate(-12)"><path d="M0 8h44q8 0 10 3t-10 3H6z" fill="#fff" stroke="#55606e" stroke-width=".8"/><path d="M22 8l-8-9h5l13 9z" fill="#e9edf2" stroke="#55606e" stroke-width=".7"/><path d="M22 14l-6 8h5l11-8z" fill="#d7dde5" stroke="#55606e" stroke-width=".7"/><path d="M2 8l-2-8h5l6 8z" fill="#ff8a66" stroke="#55606e" stroke-width=".7"/><path d="M42 9.5h7" stroke="#3f6f95" stroke-width="1.6" stroke-linecap="round"/></g>' +
+    '</svg>';
+
+  const HOUSE_ART = '<svg viewBox="0 0 70 76" aria-hidden="true">' +
+    '<defs><linearGradient id="hw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd98a"/><stop offset="1" stop-color="#f2a93b"/></linearGradient></defs>' +
+    '<ellipse cx="35" cy="72" rx="30" ry="3.5" fill="rgba(0,0,0,.3)"/>' +
+    '<path d="M10 70V32L35 10l25 22v38z" fill="#f4efe6" stroke="#2a1f3d" stroke-width="1.2"/>' +
+    '<path d="M4 34 35 6l31 28" fill="none" stroke="#7a2e3b" stroke-width="5" stroke-linejoin="round"/>' +
+    '<circle cx="35" cy="26" r="5" fill="url(#hw)" stroke="#2a1f3d" stroke-width="1"/>' +
+    '<rect x="15" y="38" width="12" height="13" rx="1" fill="url(#hw)" stroke="#2a1f3d" stroke-width="1"/><rect x="43" y="38" width="12" height="13" rx="1" fill="url(#hw)" stroke="#2a1f3d" stroke-width="1"/>' +
+    '<path d="M21 38v13M15 44.5h12M49 38v13M43 44.5h12" stroke="#2a1f3d" stroke-width=".8"/>' +
+    '<path d="M29 70V56q6-6 12 0v14z" fill="#3b6e8f" stroke="#2a1f3d" stroke-width="1"/><path d="M8 70h54" stroke="#2a1f3d" stroke-width="2"/>' +
+    '</svg>';
+
   function curve(a, b, bend) {
     const pts = [], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
     const dx = b[1] - a[1], dy = b[0] - a[0];
@@ -106,7 +151,7 @@
   function drawMap() {
     const L = window.L; if (!L) return;
     if (!map) {
-      map = L.map('fmap', { zoomControl: false, attributionControl: true });
+      map = L.map('fmap', { zoomControl: false, attributionControl: true, zoomSnap: 0.25 });
       L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + (C.cartoKey ? '?key=' + encodeURIComponent(C.cartoKey) : ''), {
         maxZoom: 16, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }).addTo(map);
@@ -115,21 +160,21 @@
     layers.forEach(l => map.removeLayer(l)); layers = []; vans = [];
     const used = [...new Set(data.map(f => (f.arrAirport || '').toUpperCase()).filter(a => AIRPORTS[a]))];
     if (!used.length) used.push('SFO', 'OAK');
-    const home = L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="fpin home">' + houseSvg + '</div>', iconSize: [46, 46], iconAnchor: [23, 23] }), title: 'Our place' })
-      .bindTooltip('OUR PLACE', { permanent: true, direction: 'top', offset: [0, -24], className: 'flabel' }).addTo(map);
+    const home = L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="fart house">' + HOUSE_ART + '<b>Our place</b></div>', iconSize: [56, 80], iconAnchor: [28, 58] }), title: 'Our place', zIndexOffset: 500 }).addTo(map);
     layers.push(home);
     const bounds = [HOME];
     used.forEach((code, k) => {
       const A = AIRPORTS[code]; bounds.push(A.ll);
       const n = data.filter(f => (f.arrAirport || '').toUpperCase() === code).length;
-      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fpin air">' + plane + '</div>', iconSize: [40, 40], iconAnchor: [20, 20] }), title: A.full })
-        .bindTooltip(code + (n ? ' · ' + n : ''), { permanent: true, direction: 'right', offset: [22, 0], className: 'flabel' }).addTo(map);
+      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fart air">' + AIRPORT_ART + '<b>' + code + (n ? ' <i>' + n + ' landing</i>' : '') + '<small>~' + A.drive + ' min to our place</small></b></div>', iconSize: [84, 96], iconAnchor: [42, 50] }), title: A.full }).addTo(map);
       const path = curve(A.ll, HOME, k % 2 ? -0.18 : 0.18);
-      const line = L.polyline(path, { color: '#120B27', weight: 4, opacity: .9, className: 'fdash' }).addTo(map);
-      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fpin van">' + vanSvg + '</div>', iconSize: [34, 34], iconAnchor: [17, 17] }), title: 'Sprinter van', interactive: false }).addTo(map);
+      const glow = L.polyline(path, { color: '#FFC857', weight: 10, opacity: .35, interactive: false }).addTo(map);
+      const line = L.polyline(path, { color: '#120B27', weight: 4, opacity: .95, className: 'fdash', interactive: false }).addTo(map);
+      layers.push(glow);
+      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fart van">' + VAN_ART + '</div>', iconSize: [56, 26], iconAnchor: [28, 21] }), title: 'Sprinter van', interactive: false, zIndexOffset: 800 }).addTo(map);
       layers.push(m, line, van); vans.push({ van, path, off: k * 0.37 });
     });
-    map.fitBounds(bounds, { padding: [40, 40] });
+    map.fitBounds(bounds, { paddingTopLeft: [50, 80], paddingBottomRight: [70, 70] });
     cancelAnimationFrame(raf);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const t0 = performance.now();
@@ -138,6 +183,7 @@
         const p = reduce ? 0.5 : ((((now - t0) / 7000 + v.off) % 1) + 1) % 1;
         const i = p * (v.path.length - 1), a = Math.floor(i), b = Math.min(a + 1, v.path.length - 1), f = i - a;
         v.van.setLatLng([v.path[a][0] + (v.path[b][0] - v.path[a][0]) * f, v.path[a][1] + (v.path[b][1] - v.path[a][1]) * f]);
+        const el = v.van.getElement(); if (el) el.firstChild.classList.toggle('left', v.path[b][1] < v.path[a][1]);
       });
       if (!reduce && sheet.classList.contains('open')) raf = requestAnimationFrame(step);
     })(t0);
@@ -197,10 +243,7 @@
 
   /* ---------- build the sheet ---------- */
   const opt = list => list.map(v => '<option>' + v + '</option>').join('');
-  const btn = document.createElement('button');
-  btn.className = 'flybtn'; btn.id = 'flyBtn'; btn.setAttribute('aria-haspopup', 'dialog'); btn.setAttribute('aria-controls', 'fsheet');
-  btn.innerHTML = plane + 'Flights';
-  document.body.appendChild(btn);
+  const btn = document.getElementById('flyBtn');
 
   const sheet = document.createElement('section');
   sheet.className = 'fsheet'; sheet.id = 'fsheet'; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-modal', 'true'); sheet.setAttribute('aria-labelledby', 'fTitle');
@@ -208,6 +251,7 @@
     '<div class="fwrap">' +
     '<div class="fhead"><h2 id="fTitle">Flights <span>&amp; vans</span></h2><button class="fx" id="fClose" type="button">&#10005; Back</button></div>' +
     '<div class="fsub">Land close together, ride together. Add your flight and we’ll line everyone up for the Sprinter van.</div>' +
+    '<button class="fadd" id="fJump" type="button">+ Add my flight</button>' +
     '<div class="fsample" id="fSample">Sample flights · real ones show up once the form is connected</div>' +
     '<div class="fmap" id="fmap" role="region" aria-label="Map: airports, the Sprinter van route and our place"></div>' +
     '<div class="fmapnote">The house icon is just the general area. We’ll share the address closer to the trip.</div>' +
@@ -240,7 +284,7 @@
   function open() {
     lastFocus = document.activeElement; sheet.classList.add('open'); document.body.classList.add('fopen');
     if (location.hash !== '#flights') history.replaceState(null, '', location.pathname + location.search + '#flights');
-    setTimeout(() => { drawMap(); map && map.invalidateSize(); document.getElementById('fClose').focus(); }, 80);
+    setTimeout(() => { map && map.invalidateSize(); drawMap(); document.getElementById('fClose').focus(); }, 480);
   }
   function close() {
     sheet.classList.remove('open'); document.body.classList.remove('fopen'); cancelAnimationFrame(raf);
@@ -248,6 +292,7 @@
     (lastFocus || btn).focus();
   }
   btn.addEventListener('click', open);
+  document.getElementById('fJump').addEventListener('click', () => { document.getElementById('fForm').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => document.querySelector('#fForm [name=name]').focus({ preventScroll: true }), 500); });
   document.getElementById('fClose').addEventListener('click', close);
   document.getElementById('fClose2').addEventListener('click', close);
   addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.contains('open')) close(); }, true);
