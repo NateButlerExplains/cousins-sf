@@ -172,7 +172,7 @@
     used.forEach((code, k) => {
       const A = AIRPORTS[code]; bounds.push(A.ll);
       const n = data.filter(f => (f.arrAirport || '').toUpperCase() === code).length;
-      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fart air">' + AIRPORT_ART + '<b>' + code + (n ? ' <i>' + n + ' landing</i>' : '') + '<small>~' + A.drive + ' min to our place</small></b></div>', iconSize: [84, 96], iconAnchor: [42, 50] }), title: A.full }).addTo(map);
+      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fart air"><img src="img/airport.png" alt=""><b>' + code + (n ? ' <i>' + n + ' landing</i>' : '') + '<small>~' + A.drive + ' min to our place</small></b></div>', iconSize: [100, 104], iconAnchor: [50, 52] }), title: A.full }).addTo(map);
       const path = curve(A.ll, HOME, k % 2 ? -0.18 : 0.18);
       const glow = L.polyline(path, { color: '#FFC857', weight: 10, opacity: .35, interactive: false }).addTo(map);
       const line = L.polyline(path, { color: '#120B27', weight: 4, opacity: .95, className: 'fdash', interactive: false }).addTo(map);
