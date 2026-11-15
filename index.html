@@ -126,6 +126,15 @@
           display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(6px); }
   .ibtn svg { width: 20px; height: 20px; }
   .ibtn.on { background: var(--gold); color: var(--night); border-color: var(--gold); }
+  .mplayer { position: fixed; right: 12px; bottom: calc(40px + env(safe-area-inset-bottom)); z-index: 9; width: min(220px, calc(100vw - 24px)); border-radius: 14px; overflow: hidden;
+             background: #0B0718; border: 1.5px solid var(--gold); box-shadow: 0 16px 40px rgba(0,0,0,.55); }
+  .mplayer[hidden] { display: none; }
+  .mhead { display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 6px 12px; }
+  .mhead b { font: 400 18px/1 Bebas; letter-spacing: .1em; color: var(--gold); }
+  .mx { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 16px; cursor: pointer; }
+  .mx:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .mframe { aspect-ratio: 16 / 9; background: #000; }
+  .mframe iframe { display: block; width: 100%; height: 100%; border: 0; }
   .dots { position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 6px; z-index: 5; pointer-events: none; }
   .dots button { pointer-events: auto; width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.4); cursor: pointer; transition: width .25s, background .25s; }
   .dots button.on { width: 22px; border-radius: 6px; background: var(--gold); }
@@ -420,11 +429,34 @@
   if (C.photosUrl) ph.href = C.photosUrl;
   else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album opens after the trip.'; ph.addEventListener('click', e => { e.preventDefault(); toast('The photo album opens after the trip.'); }); }
 
-  /* music */
+  /* music: the trip mix plays in a small YouTube player card (falls back to the bundled lo-fi loop if no link is set) */
   const music = $('music'), mb = $('musicBtn');
+  function ytEmbed(u) {
+    if (!u) return '';
+    const list = (u.match(/[?&]list=([\w-]+)/) || [])[1];
+    const vid = (u.match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([\w-]{11})/) || [])[1];
+    const q = 'autoplay=1&playsinline=1&rel=0&modestbranding=1';
+    if (vid) return 'https://www.youtube-nocookie.com/embed/' + vid + '?' + q + (list ? '&list=' + list : '');
+    if (list) return 'https://www.youtube-nocookie.com/embed/videoseries?list=' + list + '&' + q;
+    return '';
+  }
+  const embed = ytEmbed(C.playlistUrl);
+  const mp = document.createElement('div');
+  mp.className = 'mplayer'; mp.id = 'mplayer'; mp.hidden = true;
+  mp.innerHTML = '<div class="mhead"><b>Trip mix</b><button type="button" class="mx" id="mClose" aria-label="Stop music and close player">&#10005;</button></div><div class="mframe" id="mFrame"></div>';
+  document.body.appendChild(mp);
+  function setOn(on) { mb.classList.toggle('on', on); mb.setAttribute('aria-pressed', on); mb.setAttribute('aria-label', on ? 'Stop music' : 'Play music'); }
+  function closePlayer() { $('mFrame').innerHTML = ''; mp.hidden = true; setOn(false); }
+  $('mClose').addEventListener('click', closePlayer);
   mb.addEventListener('click', () => {
-    if (music.paused) { music.volume = .55; music.play().then(() => { mb.classList.add('on'); mb.setAttribute('aria-pressed', 'true'); mb.setAttribute('aria-label', 'Pause music'); }).catch(() => toast('Tap again to start the music.')); }
-    else { music.pause(); mb.classList.remove('on'); mb.setAttribute('aria-pressed', 'false'); mb.setAttribute('aria-label', 'Play music'); }
+    if (embed) {
+      if (!mp.hidden) { closePlayer(); return; }
+      $('mFrame').innerHTML = '<iframe src="' + embed + '" title="Trip mix" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+      mp.hidden = false; setOn(true);
+      return;
+    }
+    if (music.paused) { music.volume = .55; music.play().then(() => setOn(true)).catch(() => toast('Tap again to start the music.')); }
+    else { music.pause(); setOn(false); }
   });
 
   /* paging */
