@@ -110,9 +110,19 @@
     { title: 'Coach 21', where: 'Burlingame', what: 'Charter transportation and group transfers.' },
     { title: 'Allied Limos', where: 'Burlingame', what: '14-passenger Sprinter and 27-passenger shuttle bus.' }
   ];
+  // Quotes the admin entered by hand (from the napkin notes). Form entries with the same title replace these.
+  const ADMIN_QUOTES = [
+    { tracker: 'Shuttle quote', title: 'Allied Limos – Executive bus', vehicle: 'Executive bus, one vehicle for everyone', seats: 'Whole crew', total: '$215/hr · 4-hr minimum',
+      luggage: 'Everyone plus carry-ons', tracking: '', fees: 'No', status: 'Quoted', notes: 'Round trip transportation. Tip and tax extra. Contact: Vicky. Quoted for July 22–25, 2027.' },
+    { tracker: 'Shuttle quote', title: 'Allied Limos – Sprinter + car', vehicle: 'Executive Sprinter van (11) + 1 car (3)', seats: '14', total: '$180 Sprinter (1 hr) + $105 car',
+      luggage: '', tracking: '', fees: 'No', status: 'Quoted', notes: 'Sprinter is $180 for one hour. Ask whether the car’s $105 is per hour or per trip. Contact: Vicky.' },
+    { tracker: 'Shuttle quote', title: 'Allied Limos – 2 SUVs + sedan', vehicle: '2 SUVs + 1 sedan', seats: '', total: '$535 total',
+      luggage: '', tracking: '', fees: 'No', status: 'Quoted', notes: '2 SUVs at $195 each + 1 sedan at $145. Ask whether $535 is one way or round trip. Contact: Vicky.' }
+  ];
   let quotes = [], view = 'cards';
   const key = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const money = s => { const n = parseFloat(String(s || '').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : n; };
+  // Only plain single amounts ("$1,450" or "$535 total") count for "lowest"; hourly or split prices aren't comparable
+  const money = s => { const m = String(s || '').trim().match(/^\$?\s*([\d,]+(?:\.\d+)?)\s*(?:total|all in)?$/i); return m ? parseFloat(m[1].replace(/,/g, '')) : null; };
   const statusChip = s => '<span class="chip status ' + ({ Booked: 'teal', Quoted: 'gold', Passed: 'coral' }[s] || '') + '">' + esc(s || 'Not contacted yet') + '</span>';
   const yn = v => v === 'Yes' ? '<span class="chip teal">✓ ' : v === 'No' ? '<span class="chip coral">✗ ' : '<span class="chip">? ';
 
@@ -128,7 +138,7 @@
       box.innerHTML = '<div class="cards">' + sorted.map(q => '<article class="card' + (q.status === 'Booked' ? ' pick' : '') + '"><div class="body">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>' + esc(q.title) + '</h3>' + statusChip(q.status) + '</div>' +
         (q.vehicle ? '<div class="vehicle">' + esc(q.vehicle) + (q.seats ? ' · ' + esc(q.seats) + ' seats' : '') + '</div>' : '') +
-        (money(q.total) != null ? '<div class="price">' + esc(q.total) + ' <small>all in, round trip' + (q === cheapest && quotes.filter(x => money(x.total) != null).length > 1 ? ' · lowest' : '') + '</small></div>' : '') +
+        (q.total ? '<div class="price">' + esc(q.total) + ' <small>' + (q.fees === 'Yes' ? 'all in' : q.fees === 'No' ? 'before tip &amp; tax' : '') + (q === cheapest && quotes.filter(x => money(x.total) != null).length > 1 ? ' · lowest' : '') + '</small></div>' : '') +
         '<div class="chips">' + yn(q.tracking) + 'Flight tracking</span>' + yn(q.fees) + 'Fees &amp; tip included</span>' + (q.luggage ? '<span class="chip">' + esc(q.luggage) + '</span>' : '') + '</div>' +
         (q.notes ? '<div class="note">' + esc(q.notes) + '</div>' : '') +
         '<div class="actions">' + (q.link ? '<a class="btn small ghost" href="' + esc(q.link) + '" target="_blank" rel="noopener">Website ↗</a>' : '') +
@@ -144,10 +154,11 @@
     }
   }
   function renderCompanies() {
-    const byKey = new Map(quotes.map(q => [key(q.title), q]));
-    $('companies').innerHTML = COMPANIES.map(c => { const q = byKey.get(key(c.title));
+    const rank = { Booked: 3, Quoted: 2, Asked: 1 };
+    $('companies').innerHTML = COMPANIES.map(c => { const ck = key(c.title.split(' – ')[0]); const mine = quotes.filter(x => key(x.title).startsWith(ck)); const q = mine.sort((a, b) => (rank[b.status] || 0) - (rank[a.status] || 0))[0];
+      const n = mine.length;
       return '<article class="card co"><div class="body"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h3>' + esc(c.title) + '</h3>' + statusChip(q && q.status) + '</div>' +
-        '<div class="meta">' + esc(c.where) + ' · ' + esc(c.what) + '</div><div class="actions"><button class="btn small ghost" type="button" data-edit="' + esc(c.title) + '">' + (q ? 'Update quote' : 'Add quote') + '</button></div></div></article>'; }).join('');
+        '<div class="meta">' + esc(c.where) + ' · ' + esc(c.what) + (n ? ' <b style="color:#fff">' + n + ' option' + (n > 1 ? 's' : '') + ' quoted.</b>' : '') + '</div><div class="actions"><button class="btn small ghost" type="button" data-edit="' + esc(c.title) + '">' + (n ? 'Add another option' : 'Add quote') + '</button></div></div></article>'; }).join('');
     $('coList').innerHTML = COMPANIES.map(c => '<option value="' + esc(c.title) + '">').join('');
   }
   function edit(title) {
@@ -211,9 +222,9 @@
 
   load().then(rows => {
     $('sampleTag').hidden = connected;
-    quotes = latestByCompany((rows || []).filter(r => /shuttle/i.test(r.tracker || '')));
+    quotes = latestByCompany(ADMIN_QUOTES.concat((rows || []).filter(r => /shuttle/i.test(r.tracker || ''))));
     renderQuotes(); renderCompanies();
-  }).catch(() => { quotes = []; renderQuotes(); renderCompanies(); });
+  }).catch(() => { quotes = latestByCompany(ADMIN_QUOTES); renderQuotes(); renderCompanies(); });
   renderQuotes(); renderCompanies();
   flights().then(renderWindow);
 })();
