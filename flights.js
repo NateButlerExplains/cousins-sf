@@ -8,12 +8,13 @@
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
   const AIRPORTS = {
-    SFO: { name: 'SFO', full: 'San Francisco Intl', ll: [37.6213, -122.3790], drive: 30 },
-    OAK: { name: 'OAK', full: 'Oakland Intl', ll: [37.7126, -122.2197], drive: 35 },
-    SJC: { name: 'SJC', full: 'San Jose Intl', ll: [37.3639, -121.9289], drive: 60 }
+    SFO: { name: 'SFO', full: 'San Francisco Intl', ll: [37.6213, -122.3790], drive: 20 },
+    OAK: { name: 'OAK', full: 'Oakland Intl', ll: [37.7126, -122.2197], drive: 40 },
+    SJC: { name: 'SJC', full: 'San Jose Intl', ll: [37.3639, -121.9289], drive: 50 }
   };
   // The house: shown only as an icon in the general city area. No address is used anywhere.
-  const HOME = [37.7700, -122.4400];
+  // General Daly City area only. Never the house address.
+  const HOME = [37.6880, -122.4700];
   const DAYORDER = ['Wed Jul 21', 'Thu Jul 22', 'Fri Jul 23', 'Sat Jul 24', 'Sun Jul 25', 'Mon Jul 26'];
   const GROUP_MIN = 90;      // arrivals within 90 minutes share a van run
   const BAGS_MIN = 30;       // time from landing to curb
@@ -166,18 +167,18 @@
     layers.forEach(l => map.removeLayer(l)); layers = []; vans = [];
     const used = [...new Set(data.map(f => (f.arrAirport || '').toUpperCase()).filter(a => AIRPORTS[a]))];
     if (!used.length) used.push('SFO', 'OAK');
-    const home = L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="fart house">' + HOUSE_ART + '<b>Our place</b></div>', iconSize: [56, 80], iconAnchor: [28, 58] }), title: 'Our place', zIndexOffset: 500 }).addTo(map);
+    const home = L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="fart house">' + HOUSE_ART + '<b>Our place</b></div>', iconSize: [48, 72], iconAnchor: [24, 50] }), title: 'Our place', zIndexOffset: 500 }).addTo(map);
     layers.push(home);
     const bounds = [HOME];
     used.forEach((code, k) => {
       const A = AIRPORTS[code]; bounds.push(A.ll);
       const n = data.filter(f => (f.arrAirport || '').toUpperCase() === code).length;
-      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fart air"><img src="img/airport.png" alt=""><b>' + code + (n ? ' <i>' + n + ' landing</i>' : '') + '<small>~' + A.drive + ' min to our place</small></b></div>', iconSize: [100, 104], iconAnchor: [50, 52] }), title: A.full }).addTo(map);
-      const path = curve(A.ll, HOME, k % 2 ? -0.18 : 0.18);
+      const m = L.marker(A.ll, { icon: L.divIcon({ className: '', html: '<div class="fart air"><img src="img/airport.png" alt=""><b>' + code + (n ? ' <i>' + n + ' landing</i>' : '') + '<small>~' + A.drive + ' min to our place</small></b></div>', iconSize: [84, 96], iconAnchor: [42, 44] }), title: A.full }).addTo(map);
+      const path = curve(A.ll, HOME, k % 2 ? -0.22 : 0.3);
       const glow = L.polyline(path, { color: '#FFC857', weight: 10, opacity: .35, interactive: false }).addTo(map);
       const line = L.polyline(path, { color: '#120B27', weight: 4, opacity: .95, className: 'fdash', interactive: false }).addTo(map);
       layers.push(glow);
-      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fart van"><img src="img/sprinter.png" alt=""></div>', iconSize: [72, 32], iconAnchor: [36, 26] }), title: 'Sprinter van', interactive: false, zIndexOffset: 800 }).addTo(map);
+      const van = L.marker(path[0], { icon: L.divIcon({ className: '', html: '<div class="fart van"><img src="img/sprinter.png" alt=""></div>', iconSize: [54, 24], iconAnchor: [27, 20] }), title: 'Sprinter van', interactive: false, zIndexOffset: 800 }).addTo(map);
       layers.push(m, line, van); vans.push({ van, path, off: k * 0.37 });
     });
     map.fitBounds(bounds, { paddingTopLeft: [50, 80], paddingBottomRight: [70, 70] });
@@ -212,12 +213,26 @@
         (solo ? 'Riding solo so far' : g.items.length + ' riding together') + '</i></div><div class="rw">' + when + '</div><div class="chips">' + names + '</div></div>';
     }).join('');
   }
+  // Shuttle window: the arrival group that one pickup covers best, plus everyone who lands outside it.
   function sweetSpot(gs) {
     if (!gs.length) return '';
     const best = gs.slice().sort((a, b) => b.items.length - a.items.length || a.first - b.first)[0];
-    const from = best.first % 1440, to = Math.max(best.last % 1440, from + 60);
-    return '<div class="sweet"><b>Still booking? Aim for ' + best.ap + ', ' + esc(best.d) + ', landing ' + clock(from) + '–' + clock(to) + '</b>' +
-      '<span>That’s when the most cousins land, so you’ll ride in with ' + (best.items.length - 1) + (best.items.length === 2 ? ' other' : ' others') + ' in the same van run.</span></div>';
+    const from = best.first % 1440, to = best.last % 1440;
+    const inside = best.items.map(x => x.f.name), outside = [];
+    gs.forEach(g => { if (g !== best) g.items.forEach(x => outside.push(x.f.name + ' (' + g.ap + ', ' + g.d.replace(/ Jul /, ' ') + ' ' + clock(x.abs % 1440) + ')')); });
+    const all = !outside.length;
+    return '<div class="sweet"><b>Shuttle window: ' + best.ap + ', ' + esc(best.d) + ', ' + clock(from) + (to > from ? '–' + clock(to) : '') + '</b>' +
+      '<span>' + (all ? 'Everyone so far lands in this window, so one shuttle can bring the whole crew home together.'
+                      : 'One shuttle here covers ' + esc(inside.join(', ')) + '.') + '</span>' +
+      (all ? '' : '<div class="outside"><i>Outside the window</i>' + outside.map(o => '<span>' + esc(o) + '</span>').join('') + '</div>') +
+      '<span class="still">Still booking? Aim to land at ' + best.ap + ' between ' + clock(from) + ' and ' + clock(Math.max(to, from + 60)) + ' on ' + esc(best.d) + '.</span></div>';
+  }
+  function gettingThere() {
+    return '<div class="getthere">' +
+      '<div class="gopt best"><i>The plan</i><b>One private shuttle</b><span>Direct from SFO to the house. Flight tracking, luggage room, no juggling Ubers.</span></div>' +
+      '<div class="gopt"><i>Backup</i><b>Two large vans</b><span>Split into two vehicles. Easier on luggage, and pickups can still line up.</span></div>' +
+      '<div class="gopt"><i>Budget</i><b>AirTrain + BART</b><span>Free AirTrain to the SFO BART station, about 12 minutes to Daly City, then a short ride to the house.</span></div>' +
+      '</div>';
   }
   function board(list, kind) {
     const isArr = kind === 'arr';
@@ -256,11 +271,12 @@
   sheet.innerHTML =
     '<div class="fwrap">' +
     '<div class="fhead"><h2 id="fTitle">Flights <span>&amp; vans</span></h2><button class="fx" id="fClose" type="button">&#10005; Back</button></div>' +
-    '<div class="fsub">Land close together, ride together. Add your flight and we’ll line everyone up for the Sprinter van.</div>' +
+    '<div class="fsub">Land close together, ride together. Add your flight and we’ll line everyone up for the shuttle.</div>' +
     '<button class="fadd" id="fJump" type="button">+ Add my flight</button>' +
     '<div class="fsample" id="fSample">Sample flights · real ones show up once the form is connected</div>' +
     '<div class="fmap" id="fmap" role="region" aria-label="Map: airports, the Sprinter van route and our place"></div>' +
-    '<div class="fmapnote">The house icon is just the general area. We’ll share the address closer to the trip.</div>' +
+    '<div class="fmapnote">The house icon marks the general Daly City area. We’ll share the address closer to the trip.</div>' +
+    '<div class="fsec"><h3>Getting from SFO</h3><p class="lead">The house is in Daly City, about 9 miles from SFO.</p>' + gettingThere() + '</div>' +
     '<div class="fsec"><div id="fSweet"></div></div>' +
     '<div class="fsec"><h3>Airport pickups</h3><p class="lead">Arrivals within 90 minutes at the same airport share one van run. We wait for the last flight, plus about 30 minutes for bags.</p><div class="runs" id="fRuns"></div></div>' +
     '<div class="fsec"><h3>Arrivals board</h3><p class="lead">Tap a flight number for live status on trip day.</p><div class="board" id="fArr"></div></div>' +

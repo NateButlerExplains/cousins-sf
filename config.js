@@ -9,7 +9,7 @@ window.TRIP_CONFIG = {
   // YouTube Music playlist link.
   playlistUrl: 'https://youtu.be/sIQMnh5teuI?si=zaOkGLneMNseAWnn',
   // Google Photos shared album link, for after the trip.
-  photosUrl: '',
+  photosUrl: 'https://photos.app.goo.gl/uXtkppLQwA47Uo4u7',
   // Flights form ("Cousins Trip: Flights"). From its pre-filled link + the published CSV of its sheet.
   flights: {
     action: 'https://docs.google.com/forms/d/e/1FAIpQLSd6FyEjCNbDOplu_ybVNHx9Z8yzEHz80H2pDdZuGPBp76CsBw/formResponse',

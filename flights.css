@@ -93,3 +93,22 @@
         font: 400 24px/1 Bebas; letter-spacing: .08em; cursor: pointer; }
 .fadd:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .fsec #fForm { scroll-margin-top: 90px; }
+
+/* Shuttle window + getting there */
+.sweet .outside { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(18,11,39,.25); display: flex; flex-wrap: wrap; gap: 6px; }
+.sweet .outside i { flex-basis: 100%; font: 700 11px/1 DM; font-style: normal; letter-spacing: .12em; text-transform: uppercase; }
+.sweet .outside span { padding: 4px 9px; border-radius: 999px; background: rgba(18,11,39,.85); color: #fff; font: 700 12px/1.2 DM; }
+.sweet .still { display: block; margin-top: 10px; font: 600 13px/1.4 DM; }
+.getthere { display: grid; gap: 8px; }
+.gopt { padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.14); }
+.gopt.best { border-color: var(--gold); background: rgba(255,200,87,.12); }
+.gopt i { display: block; font: 700 11px/1 DM; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.gopt.best i { color: var(--gold); }
+.gopt b { display: block; margin: 5px 0 3px; font: 400 24px/1 Bebas; letter-spacing: .05em; color: #fff; }
+.gopt span { font: 500 14px/1.4 DM; color: var(--mute); }
+.fsample[hidden] { display: none; }
+.fart.van { width: 54px; }
+.fart.air { width: 84px; }
+.fart.house { width: 48px; }
+.fart b { font-size: 14px; padding: 3px 7px 2px; }
+.fmap { height: 320px; }
