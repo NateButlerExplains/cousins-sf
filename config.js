@@ -20,5 +20,7 @@ window.TRIP_CONFIG = {
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.
-  passcodeHash: '30ntcz'
+  passcodeHash: '30ntcz',
+  // Admin password hash (same FNV-1a scheme as the passcode). Keeps casual visitors out, not real security.
+  adminHash: '1ozupbj'
 };
