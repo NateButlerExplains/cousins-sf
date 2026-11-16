@@ -38,7 +38,7 @@ window.TRIP_RECS = [
     ]
   },
   {
-    id: 'games', tab: 'Game night', title: 'Game night', icon: '\u{1F3B2}',
+    id: 'games', tab: 'Game night', title: 'Game night', icon: '\u{1F3B2}', hero: 'img/game-night.jpg',
     lead: 'For a night in at the house.',
     items: [
       { title: 'Family Feud, family edition', text: 'Our own questions about us.' },
@@ -46,6 +46,7 @@ window.TRIP_RECS = [
       { wiki: "Uno_(card_game)", title: 'Uno', text: 'Easy for every age.' },
       { wiki: "Dominoes", title: 'Dominoes', text: 'Slap them down.' },
       { title: 'Taboo', text: 'Fast and loud.' },
+      { title: 'Grab the Mic', text: 'Music game night: the song plays, grab the mic and finish the lyric before anyone else.' },
       { title: 'Music trivia', text: 'Name that song.' },
       { title: 'Family trivia', text: 'Who knows the family best?' },
       { title: 'Kids vs. adults', text: 'Pick any game and split the room.' }
@@ -65,7 +66,7 @@ window.TRIP_RECS = [
     id: 'tips', tab: 'Good to know', title: 'Good to know', icon: '\u{1F4A1}',
     lead: 'Little things that make the day smoother.',
     items: [
-      { wiki: "Clipper_card", title: 'Cable car fares', text: 'Lines get long in summer. Buy fares ahead in the MuniMobile app or with a Clipper card.' },
+      { wiki: "San_Francisco_cable_car_system", title: 'Cable car fares', text: 'Lines get long in summer. Buy fares ahead in the MuniMobile app or with a Clipper card.' },
       { wiki: "Bay_Area_Rapid_Transit", title: 'BART into the city', text: 'The house is close to BART, which can be easier than several cars for a city day.' },
       { wiki: "Alcatraz_Island", title: 'Alcatraz, if you really want it', text: 'Plan 2½–3 hours and book early, since summer tickets sell out. We’ll see it from the cruise either way.' }
     ]

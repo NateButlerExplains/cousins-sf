@@ -280,6 +280,7 @@
   .radd b { font-size: 20px; line-height: 1; }
   .radd:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   .rlist { display: grid; gap: 10px; }
+  .rhero { margin-bottom: 10px; border-color: var(--gold); }
   .rcard { overflow: hidden; border-radius: 16px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); }
   .rimg { position: relative; aspect-ratio: 16 / 9; background: linear-gradient(110deg, rgba(255,255,255,.05) 30%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 70%) 0 0 / 300% 100%; animation: rshim 1.4s linear infinite; }
   .rimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
@@ -793,7 +794,7 @@
     };
     function photos(sec) {
       $('recsBody').querySelectorAll('.rimg').forEach(box => {
-        const it = sec.items[+box.dataset.k], img = box.querySelector('img');
+        const it = sec.items[+box.dataset.k] || {}, img = box.querySelector('img');
         const done = () => box.classList.add('ok'), fail = () => box.remove();
         img.addEventListener('load', done); img.addEventListener('error', () => { if (img.dataset.small && img.src !== img.dataset.small) img.src = img.dataset.small; else fail(); });
         if (img.getAttribute('src')) { if (img.complete && img.naturalWidth) done(); return; }
@@ -806,6 +807,7 @@
       $('recsTabs').querySelectorAll('.rtab').forEach((t, k) => { t.setAttribute('aria-selected', k === i); t.tabIndex = k === i ? 0 : -1; });
       $('recsBody').setAttribute('aria-labelledby', 'rtab-' + sec.id);
       $('recsBody').innerHTML = '<div class="rhead"><p class="rlead">' + esc(sec.lead || '') + '</p><button type="button" class="radd" data-add="' + i + '" aria-label="Add to ' + esc(sec.title) + '"><b aria-hidden="true">+</b> Add</button></div>' +
+        (sec.hero ? '<div class="rcard rhero"><div class="rimg"><img alt="" src="' + esc(sec.hero) + '"></div></div>' : '') +
         '<div class="rlist">' + sec.items.map(card).join('') + '</div>';
       photos(sec);
     }
