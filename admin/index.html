@@ -34,7 +34,7 @@
       <div class="kick">Organizers only</div>
       <div class="script">Trip</div>
       <div class="huge">Admin</div>
-      <p class="lead">Every tracker in one place, with links you can open or copy and share.</p>
+      <p class="lead">The shuttle and stays trackers, with links you can open or copy and share.</p>
     </div>
   </header>
 
@@ -60,12 +60,9 @@
 <script src="../tracker.js"></script>
 <script>
 (function () {
-  const { C, $, store, gate, adminBar, isAdmin } = window.TRK;
-  gate();
+  const { C, $, store, adminBar, isAdmin } = window.TRK;
   const base = location.href.split('#')[0].split('?')[0].replace(/admin\/(index\.html)?$/, '');
   const items = [
-    { name: 'Admin page', path: 'admin/', what: 'This page. Share it with the other organizers.' },
-    { name: 'Main trip site', path: '', what: 'The swipeable trip plan everyone sees.' },
     { name: 'Stays tracker', path: 'stays/', what: 'House options with photos, votes and a side-by-side comparison.' },
     { name: 'Shuttle tracker', path: 'shuttle/', what: 'Shuttle quotes side by side, with the pickup window from everyone’s flights.' }
   ];
@@ -76,7 +73,7 @@
     $('adminForm').hidden = ok; $('adminBody').hidden = !ok;
     if (!ok) return;
     $('adminCards').innerHTML = items.map(t => '<div class="acard"><b>' + t.name + '</b><p>' + t.what + '</p><div class="arow">' +
-      (t.path === 'admin/' ? '' : '<a class="btn small" href="' + base + t.path + '">Open</a>') +
+      '<a class="btn small" href="' + base + t.path + '">Open</a>' +
       '<button type="button" class="btn small ghost" data-copy="' + base + t.path + '">Copy link</button></div></div>').join('');
     if (!barShown) { adminBar('admin'); barShown = true; }
   }
@@ -88,12 +85,12 @@
   });
   $('adminForm').addEventListener('submit', e => {
     e.preventDefault();
-    if (C.adminHash && ahash($('adminPass').value.trim().toLowerCase()) === C.adminHash) { store.set('cousins-admin', C.adminHash); $('adminPass').value = ''; $('adminErr').textContent = ''; render(); }
+    if (C.adminHash && ahash($('adminPass').value.trim().toLowerCase()) === C.adminHash) { store.set('cousins-admin', C.adminHash); if (C.passcodeHash) store.set('cousins-pass', C.passcodeHash); $('adminPass').value = ''; $('adminErr').textContent = ''; render(); }
     else { $('adminErr').textContent = 'That’s not the admin password.'; $('adminPass').select(); }
   });
   $('adminLock').addEventListener('click', () => { store.del('cousins-admin'); location.reload(); });
   render();
-  if (!isAdmin()) setTimeout(() => { if (!document.getElementById('gate')) $('adminPass').focus(); }, 80);
+  if (!isAdmin()) setTimeout(() => $('adminPass').focus(), 80);
 })();
 </script>
 </body>
