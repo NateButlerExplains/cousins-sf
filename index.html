@@ -737,14 +737,26 @@
   function go(i) {
     i = Math.max(0, Math.min(pages.length - 1, i));
     const from = Math.round(track.scrollLeft / track.clientWidth);
+    if (i === from) return;
     if (Math.abs(i - from) <= 1 || matchMedia('(prefers-reduced-motion: reduce)').matches) { track.scrollTo({ left: i * track.clientWidth }); return; }
     if (jumping) return; jumping = true;
-    track.classList.add('fading');
+    const target = i * track.clientWidth;
+    track.classList.add('fading');                       // 1. fade the current page out
     setTimeout(() => {
-      track.style.scrollBehavior = 'auto'; track.scrollLeft = i * track.clientWidth; track.style.scrollBehavior = '';
-      update(); motion();
-      requestAnimationFrame(() => { track.classList.remove('fading'); track.classList.add('arriving'); setTimeout(() => { track.classList.remove('arriving'); jumping = false; }, 420); });
-    }, 230);
+      // 2. jump while invisible: no smooth scrolling and no snapping, so the browser can't animate past the pages
+      track.style.scrollSnapType = 'none'; track.style.scrollBehavior = 'auto';
+      track.scrollTo({ left: target, behavior: 'instant' }); track.scrollLeft = target;
+      let tries = 0;
+      (function settle() {
+        if (Math.abs(track.scrollLeft - target) > 2 && tries++ < 30) { track.scrollLeft = target; return requestAnimationFrame(settle); }
+        track.style.scrollSnapType = ''; track.style.scrollBehavior = '';
+        update(); motion();
+        requestAnimationFrame(() => requestAnimationFrame(() => {   // 3. ease the new page in, only once it is in place
+          track.classList.remove('fading'); track.classList.add('arriving');
+          setTimeout(() => { track.classList.remove('arriving'); jumping = false; }, 450);
+        }));
+      })();
+    }, 240);
   }
   $('mapBtn').addEventListener('click', () => go(pages.findIndex(p => p.kind === 'map')));
   $('homeBtn').addEventListener('click', () => go(0));
