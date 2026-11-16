@@ -104,7 +104,8 @@
 <script src="../tracker.js"></script>
 <script>
 (function () {
-  const { $, esc, store, connected, load, submit, pop, askName, gate, adminBar } = window.TRK;
+  const { $, esc, store, connected, load, submit, pop, askName, gate, adminBar, isAdmin } = window.TRK;
+  const site = u => /vrbo\./i.test(u) ? 'VRBO' : /airbnb\./i.test(u) ? 'Airbnb' : 'Listing';
   gate(); adminBar('stays');
 
   let houses = [], view = 'cards', sortBy = 'votes';
@@ -116,15 +117,17 @@
   const photosOf = h => [h.photo].concat(String(h.photos || '').split(/[\s,]+/)).map(s => (s || '').trim()).filter(s => /^https?:\/\//.test(s)).filter((v, i, a) => a.indexOf(v) === i);
 
   function build(rows) {
-    const stays = new Map(), votes = new Map();
+    const stays = new Map(), votes = new Map(), gone = new Set();
     rows.forEach(r => {
       const t = (r.tracker || '').toLowerCase();
+      if ((t === 'stay remove' || t === 'stay removed') && r.link) { gone.add(lid(r.link)); return; }
+      if ((t === 'stay restore') && r.link) { gone.delete(lid(r.link)); return; }
       if (t === 'stay' || t === 'stays' || t === 'house') { if (r.link) { const k = lid(r.link); stays.set(k, Object.assign({}, stays.get(k) || {}, r, { key: k })); } }
       else if (t.includes('vote') && r.link && r.name) votes.set(lid(r.link) + '|' + r.name.trim().toLowerCase(), r);
     });
     stays.forEach(h => { h.voters = []; });
     votes.forEach(v => { const h = stays.get(lid(v.link)); if (h && !/^(no|remove)/i.test(v.status || 'yes')) h.voters.push(v.name.trim()); });
-    return [...stays.values()];
+    return [...stays.values()].filter(h => !gone.has(h.key));
   }
   function sorted() {
     const by = { votes: (a, b) => b.voters.length - a.voters.length || (num(a.price) ?? 1e9) - (num(b.price) ?? 1e9),
@@ -152,7 +155,8 @@
             '<div class="votes"><b>' + h.voters.length + '</b>' + (h.voters.length ? esc(h.voters.join(', ')) : 'No votes yet') + '</div>' +
             '<div class="actions"><button class="btn small' + (mine ? ' on' : '') + '" type="button" data-vote="' + esc(h.key) + '" aria-pressed="' + mine + '">' + (mine ? '✓ Voted' : 'Vote') + '</button>' +
             '<button class="btn small ghost" type="button" data-pick="' + esc(h.key) + '" aria-pressed="' + picked.has(h.key) + '">' + (picked.has(h.key) ? '✓ Comparing' : '+ Compare') + '</button>' +
-            '<a class="btn small ghost" href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">Airbnb ↗</a></div>' +
+            '<a class="btn small ghost" href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">' + site(h.link) + ' ↗</a>' +
+            (isAdmin() ? '<button class="btn small ghost" type="button" data-remove="' + esc(h.key) + '">Remove</button>' : '') + '</div>' +
           '</div></article>'; }).join('') + '</div>';
     } else {
       const set = picked.size >= 2 ? list.filter(h => picked.has(h.key)) : list;
@@ -162,7 +166,7 @@
         ['Per night', h => esc(h.price || '—'), 'price'], ['Total', h => esc(h.total || '—'), 'total'],
         ['Sleeps', h => esc(h.sleeps || '—'), 'sleeps'], ['Bedrooms', h => esc(h.bedrooms || '—'), 'bedrooms'], ['Beds', h => esc(h.beds || '—'), 'beds'], ['Baths', h => esc(h.baths || '—'), 'baths'],
         ['Area', h => esc(h.area || '—')], ['Stands out', h => esc(h.notes || '—')],
-        ['Listing', h => '<a href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">Airbnb ↗</a>']];
+        ['Listing', h => '<a href="' + esc(cleanLink(h.link)) + '" target="_blank" rel="noopener">' + site(h.link) + ' ↗</a>']];
       const hiKeys = { votes: 1, sleeps: 1, bedrooms: 1, beds: 1, baths: 1 }, bests = {};
       ['votes', 'price', 'total', 'sleeps', 'bedrooms', 'beds', 'baths'].forEach(k => { bests[k] = k === 'votes' ? (set.length > 1 ? Math.max(...set.map(h => h.voters.length)) : null) : best(k, hiKeys[k]); });
       const isBest = (h, k) => k && bests[k] != null && (k === 'votes' ? h.voters.length === bests[k] && bests[k] > 0 : num(h[k]) === bests[k]);
@@ -208,9 +212,12 @@
     });
   }
   document.addEventListener('click', e => {
-    const v = e.target.closest('[data-vote]'), p = e.target.closest('[data-pick]'), s = e.target.closest('[data-view]');
+    const v = e.target.closest('[data-vote]'), p = e.target.closest('[data-pick]'), s = e.target.closest('[data-view]'), rm = e.target.closest('[data-remove]');
     const find = k => houses.find(h => h.key === k);
-    if (v) vote(find(v.dataset.vote));
+    if (rm) { const h = find(rm.dataset.remove); if (h) pop({ kind: 'dup', title: 'Take this one down?', msg: (h.title || 'This house') + ' will disappear from the list for everyone.', buttons: [{ label: 'Keep it', ghost: true }, { label: 'Take it down', onClick: () => setTimeout(() => {
+        submit({ tracker: 'Stay remove', link: cleanLink(h.link) }).then(() => { houses = houses.filter(x => x !== h); picked.delete(h.key); render(); pop({ kind: 'ok', title: 'Taken down', msg: (h.title || 'That house') + ' is off the list.' }); })
+          .catch(() => pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' })); }, 200) }] }); }
+    else if (v) vote(find(v.dataset.vote));
     else if (p) { const k = p.dataset.pick; picked.has(k) ? picked.delete(k) : picked.add(k); render(); }
     else if (s) openViewer(find(s.dataset.view));
   });
