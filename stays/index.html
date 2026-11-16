@@ -12,6 +12,8 @@
 <style>
   .shot { position: relative; aspect-ratio: 3 / 2; background: linear-gradient(135deg, #2a1d4a, #120B27); border: 0; padding: 0; width: 100%; cursor: zoom-in; display: block; }
   .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cmpshot { display: block; width: 150px; height: 100px; padding: 0; border: 0; border-radius: 10px; background: #2a1d4a center / cover no-repeat; cursor: zoom-in; }
+  .cmpshot:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   .shot .ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mute); font: 700 13px/1.3 DM; text-align: center; padding: 12px; }
   .shot .count { position: absolute; right: 10px; bottom: 10px; padding: 5px 10px; border-radius: 999px; background: rgba(11,7,24,.85); font: 700 12px/1 DM; color: #fff; }
   .votes { display: flex; align-items: center; gap: 8px; font: 700 13px/1.3 DM; color: var(--mute); }
@@ -161,7 +163,7 @@
     } else {
       const set = picked.size >= 2 ? list.filter(h => picked.has(h.key)) : list;
       const best = (k, hi) => { const v = set.map(h => num(h[k])).filter(x => x != null); return v.length > 1 ? (hi ? Math.max(...v) : Math.min(...v)) : null; };
-      const rows = [['Photo', h => { const p = photosOf(h)[0]; return p ? '<button class="shot" type="button" data-view="' + esc(h.key) + '" style="border-radius:10px;overflow:hidden;max-width:220px"><img class="cmpimg" src="' + esc(sized(p, 480)) + '" alt="See photos" referrerpolicy="no-referrer"></button>' : '—'; }],
+      const rows = [['Photo', h => { const p = photosOf(h)[0]; return p ? '<button class="cmpshot" type="button" data-view="' + esc(h.key) + '" aria-label="See photos of ' + esc(h.title || 'this house') + '" style="background-image:url(&quot;' + esc(sized(p, 480)) + '&quot;)"></button>' : '—'; }],
         ['Votes', h => h.voters.length + (h.voters.length ? '<div class="note">' + esc(h.voters.join(', ')) + '</div>' : ''), 'votes'],
         ['Per night', h => esc(h.price || '—'), 'price'], ['Total', h => esc(h.total || '—'), 'total'],
         ['Sleeps', h => esc(h.sleeps || '—'), 'sleeps'], ['Bedrooms', h => esc(h.bedrooms || '—'), 'bedrooms'], ['Beds', h => esc(h.beds || '—'), 'beds'], ['Baths', h => esc(h.baths || '—'), 'baths'],
