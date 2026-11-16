@@ -38,7 +38,7 @@ window.TRIP_CONFIG = {
     ]
   },
   // Everyone on the trip (from the "Who's Coming & Beds" sheet). New people added on the site join this list.
-  roster: ['Dashe', 'Nate', 'Aloni', 'Myiah', 'Kenzie', 'Dontre', 'Deon', 'RJ', 'Mari', 'Tracy', 'Terry', 'Shellena', 'AJ', 'Alex', 'Kyeon', 'Tereasa', 'Scott', 'Trey P.'],
+  roster: ['Dashe', 'Nate', 'Aloni', 'Myiah', 'Kenzie', 'Dontre', 'Deon', 'RJ', 'Mari', 'Tracy', 'Terry', 'Shellena', 'AJ', 'Alex', 'Kyeon', 'Tereasa', 'Scott', 'Trey P.', 'Charlie'],
   // Shared Google Photos albums, one per day. Empty ones fall back to photosUrl.
   photoAlbums: { thu: '', fri: '', sat: '', sun: '' },
   // Crew wall photos: Cloudinary cloud name + an UNSIGNED upload preset (never the API secret)
