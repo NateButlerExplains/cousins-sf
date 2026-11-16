@@ -19,10 +19,12 @@ window.TRIP_CONFIG = {
   },
   // Shuttle + stays trackers: one Google Form ("Cousins Trip: Trackers"). From its pre-filled link + the published CSV of its sheet.
   trackers: {
-    action: '',
-    entries: { tracker: '', name: '', link: '', title: '', photo: '', photos: '', price: '', total: '', bedrooms: '', beds: '', baths: '', sleeps: '', area: '',
-               vehicle: '', seats: '', luggage: '', tracking: '', fees: '', status: '', notes: '' },
-    csv: ''
+    action: 'https://docs.google.com/forms/d/e/1FAIpQLSfXu7-fnQyZIZd6uB5bxCtTAvzMKiZG_9hYnDMyZax-Sp3Jsw/formResponse',
+    entries: { tracker: 'entry.1001931071', name: 'entry.821482307', link: 'entry.1977806963', title: 'entry.623209062', photo: 'entry.1812176341',
+               photos: 'entry.1235695102', price: 'entry.993143941', total: 'entry.1981637754', bedrooms: 'entry.1868357792', beds: 'entry.1617820875',
+               baths: 'entry.1100148429', sleeps: 'entry.567865242', area: 'entry.1855486817', vehicle: 'entry.1741191533', seats: 'entry.422836596',
+               luggage: 'entry.1933466509', tracking: 'entry.1220163658', fees: 'entry.758034803', status: 'entry.257300097', notes: 'entry.1600394314' },
+    csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9-RNj8b4nTa6JVflze5_I-SSF6Cjizc55vzj_-FqaAsmcZsaSDUNjb4SZBi2q02bAZ2uAY3yvfh6P/pub?gid=1511093900&single=true&output=csv'
   },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
