@@ -268,18 +268,30 @@
   .cm:focus-visible, .cpx:focus-visible, button.mate:focus-visible, .crewpick:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 12px; }
   select.field { appearance: auto; }
   /* recommendations */
-  .rtabs { display: flex; gap: 8px; overflow-x: auto; margin: 18px -18px 0; padding: 0 18px 4px; scrollbar-width: none; }
-  .rtabs::-webkit-scrollbar { display: none; }
-  .rtab { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.25);
-          background: rgba(255,255,255,.06); color: #fff; font: 700 14px/1 DM; cursor: pointer; white-space: nowrap; }
+  .rtabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+  .rtab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 4px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.25);
+          background: rgba(255,255,255,.06); color: #fff; font: 700 12.5px/1.15 DM; text-align: center; cursor: pointer; }
+  .rtab span { font-size: 19px; line-height: 1; }
   .rtab[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: var(--night); }
   .rtab:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-  .rlead { margin: 16px 0 12px; font: 500 15px/1.45 DM; color: var(--mute); }
+  .rhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 12px; }
+  .rlead { margin: 0; font: 500 15px/1.45 DM; color: var(--mute); }
+  .radd { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--gold); color: var(--night); font: 800 14px/1 DM; cursor: pointer; }
+  .radd b { font-size: 20px; line-height: 1; }
+  .radd:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   .rlist { display: grid; gap: 10px; }
-  .rcard { padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); }
+  .rcard { overflow: hidden; border-radius: 16px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); }
+  .rimg { position: relative; aspect-ratio: 16 / 9; background: linear-gradient(110deg, rgba(255,255,255,.05) 30%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 70%) 0 0 / 300% 100%; animation: rshim 1.4s linear infinite; }
+  .rimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
+  .rimg.ok { animation: none; background: #000; } .rimg.ok img { opacity: 1; }
+  .rimg small { position: absolute; right: 8px; bottom: 6px; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.55); font: 600 10px/1.4 DM; color: rgba(255,255,255,.85); }
+  .rimg small a { color: inherit; text-decoration: none; }
+  @keyframes rshim { to { background-position: -150% 0; } }
+  .rtxt { padding: 14px 16px; }
   .rcard b { display: block; font: 400 24px/1.05 Bebas; letter-spacing: .04em; color: #fff; }
   .rcard p { margin: 5px 0 0; font: 500 14px/1.45 DM; color: var(--mute); }
-  .rcard a { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 12px; border-radius: 999px; background: rgba(255,200,87,.15);
+  .rcard i { display: block; margin-top: 6px; font: italic 600 12px/1.3 DM; color: var(--gold); }
+  .rcard .rgo { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 12px; border-radius: 999px; background: rgba(255,200,87,.15);
              border: 1px solid rgba(255,200,87,.5); color: var(--gold); font: 700 13px/1 DM; text-decoration: none; }
   .rcard a:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   /* photo albums by day */
@@ -301,6 +313,11 @@
   .crewlbl { font: 700 11px/1 DM; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
   .crewpick { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; border: 1.5px dashed rgba(255,200,87,.6); color: #fff; font: 600 15px/1.3 DM; cursor: pointer; }
   .crewprev { width: 56px; height: 56px; flex: none; border-radius: 50%; background: rgba(255,200,87,.15) center / cover no-repeat; display: grid; place-items: center; color: var(--gold); font: 700 26px/1 DM; }
+  .recsheet { overflow-y: auto; align-items: start; }
+  .recsheet .crewcard { margin: auto 0; gap: 8px; }
+  .recsheet .field { width: 100%; }
+  .recsheet textarea.field { min-height: 64px; padding-top: 12px; resize: vertical; font: inherit; }
+  .recpick .crewprev { width: 84px; height: 56px; border-radius: 10px; }
   .crewnote { min-height: 1.3em; font: 600 13px/1.4 DM; color: var(--mute); }
   @media (prefers-reduced-motion: reduce) { .nowplaying i { animation: none; } .menu { animation: none; } }
   /* confirmation pop-up */
@@ -442,6 +459,27 @@
     <p class="crewlead" id="crewSoon" hidden>Photo uploads are almost ready.</p>
     <button class="popbtn" type="submit" id="crewGo">Add to the crew</button>
     <div class="crewnote" id="crewNote" role="status" aria-live="polite"></div>
+  </form>
+</section>
+<section class="crewsheet recsheet" id="recSheet" role="dialog" aria-modal="true" aria-labelledby="recSheetTitle" hidden>
+  <form class="crewcard" id="recForm" novalidate>
+    <div class="crewhead"><b id="recSheetTitle">Add a pick</b><button type="button" class="mx2" id="recClose" aria-label="Close">&#10005;</button></div>
+    <p class="crewlead" id="recSheetLead">Share something worth doing. It shows up for everyone in a minute or two.</p>
+    <label class="crewlbl" for="recTitle">What is it?</label>
+    <input class="field" id="recTitle" autocomplete="off" maxlength="60" placeholder="e.g. Ghirardelli Square">
+    <label class="crewlbl" for="recText">Why it&rsquo;s worth it</label>
+    <textarea class="field" id="recText" maxlength="240" placeholder="A line or two for the family"></textarea>
+    <label class="crewlbl" for="recWhere">Where (optional)</label>
+    <input class="field" id="recWhere" autocomplete="off" placeholder="Place name, address or a link">
+    <div id="recPhotoWrap">
+      <label class="crewpick recpick" for="recFile" id="recPick" tabindex="0"><span class="crewprev" id="recPrev">+</span><span id="recPickTxt">Add a photo (optional)</span></label>
+      <input type="file" id="recFile" accept="image/*" hidden>
+    </div>
+    <label class="crewlbl" for="recWhoPick">Added by</label>
+    <select class="field" id="recWhoPick"></select>
+    <input class="field" id="recWho" autocomplete="off" placeholder="Your first name" hidden>
+    <button class="popbtn" type="submit" id="recGo">Add it</button>
+    <div class="crewnote" id="recNote" role="status" aria-live="polite"></div>
   </form>
 </section>
 <button class="nav prev" id="prev" aria-label="Previous page">&#8249;</button>
@@ -729,25 +767,115 @@
   });
   loadResults();
 
-  /* recommendations: sub-pages from recs.js */
+  /* recommendations: sub-pages from recs.js, plus picks the family adds (trackers sheet, tracker "Recs").
+     Photos: an item's own "img", a photo someone added, or the lead photo of its Wikipedia article ("wiki"). */
   (function () {
-    const R = window.TRIP_RECS || [], page = $('recsPage'); let back, cur = 0;
-    const maps = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+    const R = (window.TRIP_RECS || []).map(sec => ({ ...sec, items: sec.items.map(it => ({ ...it })) })), page = $('recsPage'); let back, cur = 0, loaded = false;
+    const T = C.trackers || {}, CL = C.cloudinary || {};
+    const canPost = !!(T.action && T.entries && T.entries.tracker), canPhoto = !!(CL.cloud && CL.preset);
+    const maps = q => /^https?:\/\//i.test(q) ? q : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+    const key = t => t.trim().toLowerCase();
+    let wcache = {}; try { wcache = JSON.parse(store.get('cousins-wiki') || '{}') || {}; } catch (e) {}
+    function wikiPhoto(title) {
+      if (wcache[title] && wcache[title].t > Date.now() - 7 * 864e5) return Promise.resolve(wcache[title]);
+      return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title)).then(r => r.ok ? r.json() : {}).then(j => {
+        const th = j.thumbnail && j.thumbnail.source, og = j.originalimage || {};
+        const src = th ? (og.width && og.width < 800 ? og.source : th.replace(/\/\d+px-/, '/800px-')) : '';
+        const v = { src, small: th || '', page: (j.content_urls && j.content_urls.mobile && j.content_urls.mobile.page) || '', t: Date.now() };
+        wcache[title] = v; try { store.set('cousins-wiki', JSON.stringify(wcache)); } catch (e) {} return v;
+      }).catch(() => ({ src: '' }));
+    }
+    const card = (it, k) => {
+      const ph = it.photo || it.img;
+      return '<div class="rcard">' + (ph || it.wiki ? '<div class="rimg" data-k="' + k + '"><img alt="" loading="lazy" decoding="async"' + (ph ? ' src="' + esc(ph) + '"' : '') + '></div>' : '') +
+        '<div class="rtxt"><b>' + esc(it.title) + '</b>' + (it.text ? '<p>' + esc(it.text) + '</p>' : '') + (it.by ? '<i>Added by ' + esc(it.by) + '</i>' : '') +
+        (it.where ? '<a class="rgo" href="' + esc(maps(it.where)) + '" target="_blank" rel="noopener">' + (/^https?:/i.test(it.where) ? 'Open link' : 'Take me there') + ' &#8599;</a>' : '') + '</div></div>';
+    };
+    function photos(sec) {
+      $('recsBody').querySelectorAll('.rimg').forEach(box => {
+        const it = sec.items[+box.dataset.k], img = box.querySelector('img');
+        const done = () => box.classList.add('ok'), fail = () => box.remove();
+        img.addEventListener('load', done); img.addEventListener('error', () => { if (img.dataset.small && img.src !== img.dataset.small) img.src = img.dataset.small; else fail(); });
+        if (img.getAttribute('src')) { if (img.complete && img.naturalWidth) done(); return; }
+        wikiPhoto(it.wiki).then(v => { if (!v.src) return fail(); img.dataset.small = v.small; img.src = v.src;
+          if (v.page) box.insertAdjacentHTML('beforeend', '<small><a href="' + esc(v.page) + '" target="_blank" rel="noopener">Photo: Wikipedia</a></small>'); });
+      });
+    }
     function show(i) {
       cur = i; const sec = R[i]; if (!sec) return;
       $('recsTabs').querySelectorAll('.rtab').forEach((t, k) => { t.setAttribute('aria-selected', k === i); t.tabIndex = k === i ? 0 : -1; });
       $('recsBody').setAttribute('aria-labelledby', 'rtab-' + sec.id);
-      $('recsBody').innerHTML = '<p class="rlead">' + esc(sec.lead || '') + '</p><div class="rlist">' + sec.items.map(it =>
-        '<div class="rcard"><b>' + esc(it.title) + '</b><p>' + esc(it.text || '') + '</p>' + (it.where ? '<a href="' + maps(it.where) + '" target="_blank" rel="noopener">Take me there &#8599;</a>' : '') + '</div>').join('') + '</div>';
+      $('recsBody').innerHTML = '<div class="rhead"><p class="rlead">' + esc(sec.lead || '') + '</p><button type="button" class="radd" data-add="' + i + '" aria-label="Add to ' + esc(sec.title) + '"><b aria-hidden="true">+</b> Add</button></div>' +
+        '<div class="rlist">' + sec.items.map(card).join('') + '</div>';
+      photos(sec);
     }
-    $('recsTabs').innerHTML = R.map((sec, k) => '<button type="button" class="rtab" role="tab" id="rtab-' + sec.id + '" aria-controls="recsBody" data-k="' + k + '">' + sec.icon + ' ' + esc(sec.title) + '</button>').join('');
-    $('recsTabs').addEventListener('click', e => { const t = e.target.closest('.rtab'); if (t) { show(+t.dataset.k); page.scrollTop = 0; } });
+    /* picks the family added */
+    function merge(rows) {
+      R.forEach(sec => { sec.items = sec.items.filter(it => !it.added); });
+      rows.forEach(r => {
+        const sec = R.find(x => x.id === r.sec) || R[0]; if (!sec || !r.title) return;
+        const same = sec.items.find(it => key(it.title) === key(r.title));
+        if (same) { if (r.photo) same.photo = r.photo; if (r.text && !same.text) same.text = r.text; if (r.where && !same.where) same.where = r.where; }
+        else sec.items.push({ title: r.title, text: r.text, where: r.where, photo: r.photo, by: r.by, added: true });
+      });
+    }
+    function load() {
+      if (!T.csv || !window.cousinsParseCSV) return;
+      fetch(T.csv + (T.csv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
+        const rows = window.cousinsParseCSV(t); if (!rows.length) return;
+        const head = rows[0].map(h => h.trim().toLowerCase()); const col = k => head.findIndex(h => h === k || h.startsWith(k));
+        const ci = { t: col('tracker'), n: col('name'), ti: col('title'), no: col('notes'), l: col('link'), p: col('photo'), a: col('area') };
+        const g = (r, i) => i < 0 ? '' : (r[i] || '').trim();
+        merge(rows.slice(1).filter(r => /^recs?$/i.test(g(r, ci.t))).map(r => ({ sec: g(r, ci.a), title: g(r, ci.ti), text: g(r, ci.no), where: g(r, ci.l), photo: g(r, ci.p), by: g(r, ci.n) })));
+        if (!page.hidden) show(cur);
+      }).catch(() => {});
+    }
+    $('recsTabs').innerHTML = R.map((sec, k) => '<button type="button" class="rtab" role="tab" id="rtab-' + sec.id + '" aria-controls="recsBody" data-k="' + k + '"><span aria-hidden="true">' + sec.icon + '</span>' + esc(sec.tab || sec.title) + '</button>').join('');
+    $('recsTabs').addEventListener('click', e => { const t = e.target.closest('.rtab'); if (t) show(+t.dataset.k); });
     $('recsTabs').addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const n = (cur + (e.key === 'ArrowRight' ? 1 : -1) + R.length) % R.length; show(n); $('rtab-' + R[n].id).focus(); });
-    function open() { back = document.activeElement; page.hidden = false; document.body.classList.add('fopen'); show(cur); setTimeout(() => $('recsClose').focus(), 30); }
+    function open() { back = document.activeElement; page.hidden = false; document.body.classList.add('fopen'); show(cur); if (!loaded) { loaded = true; load(); } setTimeout(() => $('recsClose').focus(), 30); }
     function close() { page.hidden = true; document.body.classList.remove('fopen'); back && back.focus && back.focus(); }
     $('recsBtn').addEventListener('click', open);
     $('recsClose').addEventListener('click', close);
-    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') close(); });
+    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' && sheet.hidden) close(); });
+
+    /* the + button: add a pick (or a photo for one that's already listed) */
+    const sheet = $('recSheet'); let addTo = 0, picked = null, sback, pickerReady = false;
+    function resetPick() { picked = null; $('recFile').value = ''; $('recPrev').style.backgroundImage = ''; $('recPrev').textContent = '+'; $('recPickTxt').textContent = 'Add a photo (optional)'; }
+    function openAdd(i) {
+      sback = document.activeElement; addTo = i; const sec = R[i];
+      if (!pickerReady && window.cousinsNamePicker) { window.cousinsNamePicker($('recWhoPick'), $('recWho')); pickerReady = true; }
+      ['recTitle', 'recText', 'recWhere'].forEach(id => $(id).value = ''); resetPick(); $('recNote').textContent = '';
+      $('recSheetTitle').textContent = 'Add to ' + (sec.tab || sec.title);
+      $('recSheetLead').textContent = 'Share something worth doing. To add a photo to one that’s already listed, use the same name.';
+      $('recPhotoWrap').hidden = !canPhoto; sheet.hidden = false; setTimeout(() => $('recTitle').focus(), 30);
+    }
+    function closeAdd() { sheet.hidden = true; sback && sback.focus && sback.focus(); }
+    $('recsBody').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) openAdd(+b.dataset.add); });
+    $('recClose').addEventListener('click', closeAdd);
+    sheet.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') closeAdd(); });
+    sheet.addEventListener('click', e => { if (e.target === sheet) closeAdd(); });
+    $('recFile').addEventListener('change', () => { const f = $('recFile').files[0]; if (!f) return; picked = f;
+      $('recPrev').style.backgroundImage = 'url(' + URL.createObjectURL(f) + ')'; $('recPrev').textContent = ''; $('recPickTxt').textContent = 'Nice. Tap to change it.'; });
+    $('recForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const sec = R[addTo], title = $('recTitle').value.trim(), text = $('recText').value.trim(), where = $('recWhere').value.trim(), by = $('recWho').value.trim();
+      if (!title) { $('recNote').textContent = 'Give it a name first.'; $('recTitle').focus(); return; }
+      if (!by) { $('recNote').textContent = 'Pick your name.'; $('recWhoPick').focus(); return; }
+      const same = sec.items.find(it => key(it.title) === key(title));
+      if (same && !picked) { $('recNote').textContent = title + ' is already on the list. Add a photo to share one for it.'; return; }
+      if (!canPost) { pop({ kind: 'dup', title: 'Almost ready', msg: 'Adding picks isn’t connected yet.' }); return; }
+      $('recGo').disabled = true; $('recNote').textContent = picked ? 'Uploading the photo…' : 'Adding…';
+      try {
+        const photo = picked && window.cousinsUpload ? await window.cousinsUpload(picked, 'c_fill,g_auto,w_800,h_450,q_auto,f_auto') : '';
+        await window.cousinsTrackerPost({ tracker: 'Recs', area: sec.id, title, notes: text, link: where, photo, name: by });
+        store.set('cousins-name', by);
+        if (same) { same.photo = photo || same.photo; } else sec.items.push({ title, text, where, photo, by, added: true });
+        closeAdd(); show(addTo);
+        pop({ kind: 'ok', title: same ? 'Photo added' : 'Added', msg: same ? 'Thanks! Everyone will see it in a minute or two.' : title + ' is on the list. Everyone will see it in a minute or two.' });
+      } catch (err) { $('recNote').textContent = 'That didn’t go through. Check your connection and try again.'; }
+      finally { $('recGo').disabled = false; }
+    });
   })();
 
   /* photo albums: one per day, falling back to the main album until a day's link is set */
@@ -955,6 +1083,14 @@
       return fetch(T.action, { method: 'POST', mode: 'no-cors', body: fd });
     }
     function remember(name, status, photo) { const k = name.toLowerCase(), prev = crew.get(k) || { name, photo: '', status: '' }; crew.set(k, { name: prev.name, photo: photo || prev.photo, status: status || prev.status }); render(); }
+    window.cousinsParseCSV = parse;
+    window.cousinsTrackerPost = post;
+    window.cousinsUpload = async (file, tf) => {
+      const fd = new FormData(); fd.append('file', await shrink(file, 1280)); fd.append('upload_preset', CL.preset); fd.append('folder', 'cousins-crew');
+      const j = await fetch('https://api.cloudinary.com/v1_1/' + encodeURIComponent(CL.cloud) + '/image/upload', { method: 'POST', body: fd }).then(r => r.json());
+      if (!j.secure_url) throw new Error((j.error && j.error.message) || 'upload');
+      return j.secure_url.replace('/upload/', '/upload/' + tf + '/');
+    };
     window.cousinsCrewAdd = (name, status) => { if (!canPost || !name) return; post({ tracker: 'Crew', name, status }).then(() => remember(name, status)); };
 
     /* "pick your name" lists: everyone on the crew, plus "someone new" for a typed name */
@@ -981,7 +1117,7 @@
     document.addEventListener('click', e => { if (e.target.closest('[data-crew="open"]')) openPage(); });
 
     /* photo card: for someone on the list, or to add someone new */
-    const shrink = file => new Promise((res, rej) => { const img = new Image(); img.onload = () => { const m = 640, k = Math.min(1, m / Math.max(img.width, img.height));
+    const shrink = (file, max) => new Promise((res, rej) => { const img = new Image(); img.onload = () => { const m = max || 640, k = Math.min(1, m / Math.max(img.width, img.height));
       const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
       cv.toBlob(b => b ? res(b) : rej(new Error('photo')), 'image/jpeg', .85); URL.revokeObjectURL(img.src); }; img.onerror = rej; img.src = URL.createObjectURL(file); });
     let picked = null, back, forWho = '';
