@@ -267,6 +267,21 @@
   .cptip b { color: var(--gold); }
   .cm:focus-visible, .cpx:focus-visible, button.mate:focus-visible, .crewpick:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 12px; }
   select.field { appearance: auto; }
+  /* recommendations */
+  .rtabs { display: flex; gap: 8px; overflow-x: auto; margin: 18px -18px 0; padding: 0 18px 4px; scrollbar-width: none; }
+  .rtabs::-webkit-scrollbar { display: none; }
+  .rtab { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.25);
+          background: rgba(255,255,255,.06); color: #fff; font: 700 14px/1 DM; cursor: pointer; white-space: nowrap; }
+  .rtab[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .rtab:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .rlead { margin: 16px 0 12px; font: 500 15px/1.45 DM; color: var(--mute); }
+  .rlist { display: grid; gap: 10px; }
+  .rcard { padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12); }
+  .rcard b { display: block; font: 400 24px/1.05 Bebas; letter-spacing: .04em; color: #fff; }
+  .rcard p { margin: 5px 0 0; font: 500 14px/1.45 DM; color: var(--mute); }
+  .rcard a { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 12px; border-radius: 999px; background: rgba(255,200,87,.15);
+             border: 1px solid rgba(255,200,87,.5); color: var(--gold); font: 700 13px/1 DM; text-decoration: none; }
+  .rcard a:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   /* photo albums by day */
   .albums { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--W) * .025); margin-top: 4%; }
   .alb { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: calc(var(--W) * .03) calc(var(--W) * .035); border-radius: 16px; text-decoration: none; color: var(--night);
@@ -394,6 +409,7 @@
   <button type="button" class="mitem" id="flyBtn" aria-haspopup="dialog" aria-controls="fsheet"><span class="mic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>Flights &amp; vans</button>
   <button type="button" class="mitem" id="crewBtn" aria-haspopup="dialog" aria-controls="crewSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 6 4.9"/></svg></span>Meet the crew</button>
   <button type="button" class="mitem" id="albumBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Photo albums</button>
+  <button type="button" class="mitem" id="recsBtn" aria-haspopup="dialog" aria-controls="recsPage"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>Recommendations</button>
   <button type="button" class="mitem dim" id="adminBtn" aria-haspopup="dialog" aria-controls="adminSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>Admin</button>
 </div>
 <button class="nowplaying" id="musicBtn" type="button" aria-label="Music off. Tap to play." aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M3 3l18 18" stroke-width="2.4"/></svg><i></i><i></i><i></i></button>
@@ -403,6 +419,14 @@
       <button type="button" class="cpx" id="crewPageClose">&#10005; Back</button></div>
     <div class="cpgrid" id="crewGrid"></div>
     <p class="cptip">Tap your own circle to add or change your photo. Someone else coming? Tap <b>+ Add someone</b>.</p>
+  </div>
+</section>
+<section class="crewpage" id="recsPage" role="dialog" aria-modal="true" aria-labelledby="recsTitle" hidden>
+  <div class="cpwrap">
+    <div class="cphead"><div><div class="cpk">IF YOU HAVE TIME</div><div class="cps">Our</div><h2 class="cph" id="recsTitle">Picks</h2></div>
+      <button type="button" class="cpx" id="recsClose">&#10005; Back</button></div>
+    <div class="rtabs" role="tablist" aria-label="Kinds of recommendations" id="recsTabs"></div>
+    <div id="recsBody" role="tabpanel"></div>
   </div>
 </section>
 <section class="crewsheet" id="crewSheet" role="dialog" aria-modal="true" aria-labelledby="crewTitle" hidden>
@@ -430,6 +454,7 @@
 <!-- Music: "Lofi Hiphop Rainy Day Coffee" by echoes_of_lumen, via Pixabay (Pixabay Content License). -->
 
 <script src="config.js"></script>
+<script src="recs.js"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script>
   const C = window.TRIP_CONFIG || {};
@@ -703,6 +728,27 @@
     }).catch(() => { pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }); });
   });
   loadResults();
+
+  /* recommendations: sub-pages from recs.js */
+  (function () {
+    const R = window.TRIP_RECS || [], page = $('recsPage'); let back, cur = 0;
+    const maps = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+    function show(i) {
+      cur = i; const sec = R[i]; if (!sec) return;
+      $('recsTabs').querySelectorAll('.rtab').forEach((t, k) => { t.setAttribute('aria-selected', k === i); t.tabIndex = k === i ? 0 : -1; });
+      $('recsBody').setAttribute('aria-labelledby', 'rtab-' + sec.id);
+      $('recsBody').innerHTML = '<p class="rlead">' + esc(sec.lead || '') + '</p><div class="rlist">' + sec.items.map(it =>
+        '<div class="rcard"><b>' + esc(it.title) + '</b><p>' + esc(it.text || '') + '</p>' + (it.where ? '<a href="' + maps(it.where) + '" target="_blank" rel="noopener">Take me there &#8599;</a>' : '') + '</div>').join('') + '</div>';
+    }
+    $('recsTabs').innerHTML = R.map((sec, k) => '<button type="button" class="rtab" role="tab" id="rtab-' + sec.id + '" aria-controls="recsBody" data-k="' + k + '">' + sec.icon + ' ' + esc(sec.title) + '</button>').join('');
+    $('recsTabs').addEventListener('click', e => { const t = e.target.closest('.rtab'); if (t) { show(+t.dataset.k); page.scrollTop = 0; } });
+    $('recsTabs').addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const n = (cur + (e.key === 'ArrowRight' ? 1 : -1) + R.length) % R.length; show(n); $('rtab-' + R[n].id).focus(); });
+    function open() { back = document.activeElement; page.hidden = false; document.body.classList.add('fopen'); show(cur); setTimeout(() => $('recsClose').focus(), 30); }
+    function close() { page.hidden = true; document.body.classList.remove('fopen'); back && back.focus && back.focus(); }
+    $('recsBtn').addEventListener('click', open);
+    $('recsClose').addEventListener('click', close);
+    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') close(); });
+  })();
 
   /* photo albums: one per day, falling back to the main album until a day's link is set */
   document.querySelectorAll('[data-album]').forEach(el => {
