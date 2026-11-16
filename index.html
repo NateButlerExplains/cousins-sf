@@ -97,7 +97,18 @@
   .panel.mappanel { padding: 5% 0 0; justify-content: flex-start; background: var(--night); }
   .mappanel .mhead { padding: 0 6%; }
   .mappanel .huge { font-size: calc(var(--W) * .15); }
-  #map { width: 100%; flex: 1; margin-top: 3%; background: #e8e4dc; touch-action: none; }
+  .mapbox { position: relative; width: 100%; flex: 1; margin-top: 3%; display: flex; }
+  #map { width: 100%; flex: 1; background: #e8e4dc; touch-action: pan-x pan-y; }
+  .mapbox.exploring #map { touch-action: none; }
+  .mapcover { position: absolute; inset: 0; z-index: 500; border: 0; background: linear-gradient(180deg, rgba(18,11,39,0) 55%, rgba(18,11,39,.55)); display: flex;
+              align-items: flex-end; justify-content: center; padding-bottom: 16px; cursor: pointer; touch-action: pan-x pan-y; }
+  .mapcover span { padding: 11px 18px; border-radius: 999px; background: var(--gold); color: var(--night); font: 400 calc(var(--W) * .045)/1 Bebas; letter-spacing: .08em; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+  .mapx { position: absolute; top: 10px; right: 10px; z-index: 600; height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid #120B27; background: var(--gold);
+          color: var(--night); font: 400 20px/1 Bebas; letter-spacing: .08em; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+  .mapbox:not(.exploring) .mapx, .mapbox.exploring .mapcover { display: none; }
+  .mapcover:focus-visible, .mapx:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
+  .homepin { width: 38px; height: 38px; border-radius: 50%; background: #fff; color: #120B27; border: 2px solid #120B27; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,.45); }
+  .homepin svg { width: 22px; height: 22px; }
   .pin { width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: var(--night); display: flex; align-items: center; justify-content: center;
          font: 700 14px/1 DM; border: 2px solid #120B27; box-shadow: 0 4px 12px rgba(0,0,0,.45); }
   .pin.thu { background: var(--coral); } .pin.fri { background: var(--gold); } .pin.sat { background: var(--teal); } .pin.sun { background: #FF9FBE; }
@@ -345,7 +356,9 @@
     map: () =>
       '<div class="panel mappanel">' +
       '<div class="mhead"><div class="kick">EVERY STOP, ONE CITY</div><div class="huge">The Map</div></div>' +
-      '<div id="map" role="region" aria-label="Map of every stop on the trip"></div>' +
+      '<div class="mapbox" id="mapBox"><div id="map" role="region" aria-label="Map of every stop on the trip"></div>' +
+        '<button type="button" class="mapcover" id="mapCover" aria-label="Explore the map: pan and zoom"><span>Tap to explore the map</span></button>' +
+        '<button type="button" class="mapx" id="mapX" aria-label="Done exploring, back to swiping">&#10005; Done</button></div>' +
       '<div class="legend"><span style="--c:var(--coral)">THU</span><span style="--c:var(--gold)">FRI</span><span style="--c:var(--teal)">SAT</span><span style="--c:#FF9FBE">SUN</span></div>' +
       '</div>',
     rsvp: () =>
@@ -455,9 +468,26 @@
         .bindPopup('<b>' + esc(p.what) + '</b>' + esc(p.when) + '<br><a href="#p' + (i + 1) + '" data-go="' + i + '">See the page &rarr;</a>');
       pts.push(p.map);
     });
+    // Our place: general Daly City area only, details to come
+    const HOME = [37.6880, -122.4700];
+    L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="homepin"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg></div>', iconSize: [38, 38], iconAnchor: [19, 19] }), title: 'Our place, Daly City' })
+      .addTo(map).bindPopup('<b>Our place</b>Daly City &middot; details to come');
+    pts.push(HOME);
     map.fitBounds(pts, { padding: [24, 24] });
+    // Locked by default so swipes move between pages; "Tap to explore" unlocks pan and zoom, "Done" locks it again
+    setMapLock(true);
     map.on('popupopen', e => { const a = e.popup.getElement().querySelector('[data-go]'); if (a) a.addEventListener('click', ev => { ev.preventDefault(); go(+a.dataset.go); }); });
   }
+
+  function setMapLock(locked) {
+    const box = $('mapBox'); if (!box) return;
+    box.classList.toggle('exploring', !locked);
+    if (map) ['dragging', 'touchZoom', 'doubleClickZoom', 'scrollWheelZoom', 'boxZoom', 'keyboard'].forEach(h => map[h] && map[h][locked ? 'disable' : 'enable']());
+  }
+  document.addEventListener('click', e => {
+    if (e.target.closest('#mapCover')) { setMapLock(false); setTimeout(() => $('mapX').focus(), 30); }
+    else if (e.target.closest('#mapX')) { setMapLock(true); map && map.closePopup(); $('mapCover').focus(); }
+  });
 
   /* Google Forms */
   const submitForm = (cfg, fields) => { const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => fd.append(k, v)); return fetch(cfg.action, { method: 'POST', mode: 'no-cors', body: fd }); };
@@ -579,7 +609,7 @@
       });
       [...dots.children].forEach((d, k) => { d.classList.toggle('on', k === i); d.setAttribute('aria-current', k === i ? 'true' : 'false'); });
       prev.disabled = i === 0; next.disabled = i === pages.length - 1;
-      if (pages[i].kind === 'map') { buildMap(); setTimeout(() => map && map.invalidateSize(), 60); }
+      if (pages[i].kind === 'map') { buildMap(); setTimeout(() => map && map.invalidateSize(), 60); } else if (map) setMapLock(true);
       if (pages[i].kind === 'vote') loadResults();
       if (location.hash !== '#p' + (i + 1)) history.replaceState(null, '', location.pathname + location.search + '#p' + (i + 1));
     }
