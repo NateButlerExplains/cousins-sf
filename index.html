@@ -249,6 +249,8 @@
   .mate.add .av { background: rgba(255,200,87,.15); border-style: dashed; color: var(--gold); cursor: pointer; }
   button.mate { border: 0; background: none; padding: 0; cursor: pointer; color: inherit; }
   .mate.out, .cm.out { opacity: .45; }
+  .mate .av.yes, .cm .av.yes { border-color: #3DDC84; box-shadow: 0 0 0 2px rgba(61,220,132,.35); }
+  .mate .av.no, .cm .av.no { border-color: #FF4D4D; box-shadow: 0 0 0 2px rgba(255,77,77,.3); }
   .crewpage { position: fixed; inset: 0; z-index: 16; background: var(--night); overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .crewpage[hidden] { display: none; }
   .cpwrap { max-width: 560px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom)); }
@@ -752,7 +754,7 @@
     if (sent[key]) { pop({ kind: 'dup', title: 'Already sent', msg: 'We already have an answer for ' + name + ' (' + sent[key] + '). No need to send it again.' }); return; }
     submitForm(C.rsvp, { [C.rsvp.nameEntry]: name, [C.rsvp.answerEntry]: rsvpAns }).then(() => {
       sent[key] = rsvpAns; store.set('cousins-rsvp-names', JSON.stringify(sent)); store.set('cousins-rsvp', rsvpAns);
-      if (window.cousinsCrewAdd && rsvpAns === 'I’m in!') window.cousinsCrewAdd(name, 'in');
+      if (window.cousinsCrewAdd && rsvpAns === 'I’m in!') window.cousinsCrewAdd(name, 'rsvp-in');
       if (window.cousinsCrewAdd && /Can/.test(rsvpAns)) window.cousinsCrewAdd(name, 'out');
       $('rsvpNote').textContent = 'Answer sent for ' + name + '.';
       pop({ kind: 'ok', title: rsvpAns === 'I’m in!' ? 'You’re in!' : 'Got it', msg: rsvpAns === 'I’m in!' ? 'Thanks, ' + name + '. See you in San Francisco!' : 'Thanks, ' + name + '. Your answer is in.' });
@@ -1090,7 +1092,10 @@
     const canPost = !!(T.action && T.entries && T.entries.tracker), canRead = !!T.csv, canPhoto = !!(CL.cloud && CL.preset);
     const COLORS = ['#6FE0D2', '#FFC857', '#FF8A66', '#FF9FBE', '#B9A5FF', '#8FD694'];
     const colorOf = n => COLORS[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
-    const base = () => new Map((C.roster || []).map(n => [n.toLowerCase(), { name: n, photo: '', status: '' }]));
+    const base = () => new Map((C.roster || []).map(n => [n.toLowerCase(), { name: n, photo: '', status: '', rsvp: '' }]));
+    /* RSVP ring: green only when the person tapped "I'm in!" (status rsvp-in, or an older photo-less 'in' row); adding a photo doesn't count */
+    const isOut = m => m.rsvp === 'out' || (!m.rsvp && /^out/i.test(m.status));
+    const ring = m => m.rsvp === 'in' ? ' yes' : ' no';
     let crew = base();
     const parse = text => { const rows = []; let row = [], cur = '', q = false;
       for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
@@ -1098,15 +1103,15 @@
       if (cur !== '' || row.length) { row.push(cur); rows.push(row); } return rows; };
     const people = () => [...crew.values()];
     window.cousinsNames = () => people().map(m => m.name);
-    const badge = (m, big) => '<div class="av' + (big ? ' big' : '') + '" style="--c:' + colorOf(m.name) + (m.photo ? ';background-image:url(' + esc(m.photo) + ')' : '') + '">' +
+    const badge = (m, big) => '<div class="av' + (big ? ' big' : '') + ring(m) + '" style="--c:' + colorOf(m.name) + (m.photo ? ';background-image:url(' + esc(m.photo) + ')' : '') + '">' +
       (m.photo ? '' : esc(m.name.slice(0, 1).toUpperCase())) + (big && !m.photo ? '<span class="cam" aria-hidden="true">+</span>' : '') + '</div>';
     function render() {
       const list = people();
       const row = $('crewRow');
-      if (row) row.innerHTML = list.map(m => '<button type="button" class="mate' + (/^out/i.test(m.status) ? ' out' : '') + '" data-crew="open">' + badge(m) + '<small>' + esc(m.name) + '</small></button>').join('') +
+      if (row) row.innerHTML = list.map(m => '<button type="button" class="mate' + (isOut(m) ? ' out' : '') + '" data-crew="open">' + badge(m) + '<small>' + esc(m.name) + '</small></button>').join('') +
         '<button type="button" class="mate add" data-crew="open" aria-label="See everyone"><div class="av">&rarr;</div><small>See all</small></button>';
-      $('crewGrid').innerHTML = list.map(m => '<button type="button" class="cm' + (/^out/i.test(m.status) ? ' out' : '') + '" data-who="' + esc(m.name) + '" aria-label="' + esc(m.name) + (m.photo ? ', change photo' : ', add a photo') + '">' + badge(m, true) +
-        '<b>' + esc(m.name) + '</b><i>' + (/^out/i.test(m.status) ? 'Can’t make it' : m.photo ? '' : 'Add a photo') + '</i></button>').join('') +
+      $('crewGrid').innerHTML = list.map(m => '<button type="button" class="cm' + (isOut(m) ? ' out' : '') + '" data-who="' + esc(m.name) + '" aria-label="' + esc(m.name) + (m.photo ? ', change photo' : ', add a photo') + '">' + badge(m, true) +
+        '<b>' + esc(m.name) + '</b><i>' + (isOut(m) ? 'Can’t make it' : m.photo ? '' : 'Add a photo') + '</i></button>').join('') +
         '<button type="button" class="cm add" data-who="" aria-label="Add someone new to the trip"><div class="av big">+</div><b>Add someone</b><i>New to the trip</i></button>';
       document.querySelectorAll('select.namepick').forEach(fillPicker);
     }
@@ -1119,8 +1124,11 @@
         const ci = { t: col('tracker'), n: col('name'), p: col('photo'), s: col('status') };
         const m = base();
         rows.slice(1).forEach(r => { if (!/^crew/i.test((r[ci.t] || '').trim())) return; const n = (r[ci.n] || '').trim(); if (!n) return;
-          const k = n.toLowerCase(), prev = m.get(k) || { name: n, photo: '', status: '' };
-          m.set(k, { name: prev.name, photo: (r[ci.p] || '').trim() || prev.photo, status: (r[ci.s] || '').trim() || prev.status }); });
+          const k = n.toLowerCase(), prev = m.get(k) || { name: n, photo: '', status: '', rsvp: '' };
+          const st = (r[ci.s] || '').trim(), ph = (r[ci.p] || '').trim();
+          let rsvp = prev.rsvp;
+          if (/^rsvp-in/i.test(st) || (/^in$/i.test(st) && !ph)) rsvp = 'in'; else if (/^(rsvp-)?out/i.test(st)) rsvp = 'out';
+          m.set(k, { name: prev.name, photo: ph || prev.photo, status: st && !/^photo/i.test(st) ? st : prev.status, rsvp }); });
         crew = m; render();
       }).catch(() => {});
     }
@@ -1128,7 +1136,9 @@
       const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => { const e = T.entries[k]; if (e && v) fd.append(e, v); });
       return fetch(T.action, { method: 'POST', mode: 'no-cors', body: fd });
     }
-    function remember(name, status, photo) { const k = name.toLowerCase(), prev = crew.get(k) || { name, photo: '', status: '' }; crew.set(k, { name: prev.name, photo: photo || prev.photo, status: status || prev.status }); render(); }
+    function remember(name, status, photo) { const k = name.toLowerCase(), prev = crew.get(k) || { name, photo: '', status: '', rsvp: '' };
+      const rsvp = /^rsvp-in/i.test(status || '') ? 'in' : /out/i.test(status || '') ? 'out' : prev.rsvp;
+      crew.set(k, { name: prev.name, photo: photo || prev.photo, status: status && !/^photo/i.test(status) ? status : prev.status, rsvp }); render(); }
     window.cousinsParseCSV = parse;
     window.cousinsTrackerPost = post;
     window.cousinsUpload = async (file, tf) => {
@@ -1203,8 +1213,8 @@
           if (!j.secure_url) throw new Error((j.error && j.error.message) || 'upload');
           photo = j.secure_url.replace('/upload/', '/upload/c_fill,g_face,w_240,h_240,q_auto,f_auto/');
         }
-        await post({ tracker: 'Crew', name, photo, status: 'in' });
-        remember(name, 'in', photo); closeCard();
+        await post({ tracker: 'Crew', name, photo, status: 'photo' });
+        remember(name, 'photo', photo); closeCard();
         store.set('cousins-name', forWho || name);
         pop({ kind: 'ok', title: forWho ? 'Photo saved' : 'Added to the crew', msg: forWho ? 'Looking good, ' + name + '! Everyone will see it in a minute or two.' : name + ' is on the crew page now.' });
       } catch (err) { $('crewNote').textContent = 'That didn’t go through. Check your connection and try again.'; }
