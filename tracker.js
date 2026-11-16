@@ -77,7 +77,7 @@
     const saved = store.get('cousins-name');
     if (saved) return then(saved);
     pop({ kind: 'ask', title: 'Who’s this?', msg: 'Your first name, so votes are one per person.',
-      html: '<input class="field" id="askName" autocomplete="given-name" placeholder="First name">',
+      html: '<input class="field" id="askName" autocomplete="given-name" placeholder="First name" list="askNames"><datalist id="askNames">' + (C.roster || []).map(n => '<option value="' + esc(n) + '">').join('') + '</datalist>',
       buttons: [{ label: 'Continue', onClick: () => { const v = ($('askName').value || '').trim(); if (!v) { $('askName').focus(); return false; } store.set('cousins-name', v); setTimeout(() => then(v), 200); } },
                 { label: 'Cancel', ghost: true }] });
   }

@@ -37,6 +37,10 @@ window.TRIP_CONFIG = {
         luggage: '', tracking: '', fees: 'No', status: 'Quoted', notes: '2 SUVs at $195 each + 1 sedan at $145. Ask whether $535 is one way or round trip. Contact: Vicky.' }
     ]
   },
+  // Everyone on the trip (from the "Who's Coming & Beds" sheet). New people added on the site join this list.
+  roster: ['Dashe', 'Nate', 'Aloni', 'Myiah', 'Kenzie', 'Dontre', 'Deon', 'RJ', 'Mari', 'Tracy', 'Terry', 'Shellena', 'AJ', 'Alex', 'Kyeon', 'Tereasa', 'Scott', 'Trey P.'],
+  // Shared Google Photos albums, one per day. Empty ones fall back to photosUrl.
+  photoAlbums: { thu: '', fri: '', sat: '', sun: '' },
   // Crew wall photos: Cloudinary cloud name + an UNSIGNED upload preset (never the API secret)
   cloudinary: { cloud: 'ezljgye8', preset: 'cousins_crew' },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).

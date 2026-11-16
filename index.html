@@ -168,6 +168,9 @@
   .cdpanel .mate .av { width: calc(var(--W) * .1); height: calc(var(--W) * .1); font-size: calc(var(--W) * .045); }
   .cdpanel .btnrow { flex-wrap: nowrap; margin-top: 3%; }
   .cdpanel .btnrow .btn { padding-left: 4%; padding-right: 4%; font-size: calc(var(--W) * .042); min-height: 0; height: calc(var(--W) * .1); white-space: nowrap; }
+  .rsvppanel .script { font-size: calc(var(--W) * .08); }
+  .rsvppanel .huge { font-size: calc(var(--W) * .15); }
+  .rsvppanel .note:empty { min-height: 0; margin: 0; }
   /* one menu button */
   .menubtn { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 9; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.35);
              background: rgba(18,11,39,.62); color: #fff; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(8px); }
@@ -225,6 +228,36 @@
               display: grid; place-items: center; font: 400 calc(var(--W) * .05)/1 Bebas; color: var(--night); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
   .mate small { display: block; margin-top: 4px; font: 700 calc(var(--W) * .023)/1.1 DM; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mate.add .av { background: rgba(255,200,87,.15); border-style: dashed; color: var(--gold); cursor: pointer; }
+  button.mate { border: 0; background: none; padding: 0; cursor: pointer; color: inherit; }
+  .mate.out, .cm.out { opacity: .45; }
+  .crewpage { position: fixed; inset: 0; z-index: 16; background: var(--night); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .crewpage[hidden] { display: none; }
+  .cpwrap { max-width: 560px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom)); }
+  .cphead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .cpk { font: 700 11px/1 DM; letter-spacing: .3em; color: var(--mute); }
+  .cps { font: 400 40px/1 Yellowtail; color: var(--gold); margin-top: 6px; }
+  .cph { margin: 0; font: 400 64px/.9 Anton; text-transform: uppercase; color: #fff; }
+  .cpx { flex: none; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--gold); color: var(--night); font: 400 20px/1 Bebas; letter-spacing: .08em; cursor: pointer; }
+  .cpgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 18px 10px; margin-top: 20px; }
+  .cm { border: 0; background: none; padding: 0; color: #fff; text-align: center; cursor: pointer; font: inherit; }
+  .cm b { display: block; margin-top: 7px; font: 700 14px/1.2 DM; }
+  .cm i { display: block; min-height: 1.2em; font: 500 11px/1.2 DM; font-style: normal; color: var(--mute); }
+  .cm .av { position: relative; width: 86px; height: 86px; margin: 0 auto; border-radius: 50%; border: 3px solid var(--gold); background: var(--c, #6FE0D2) center / cover no-repeat;
+           display: grid; place-items: center; font: 400 38px/1 Bebas; color: var(--night); box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+  .cm.add .av { background: rgba(255,200,87,.15); border-style: dashed; color: var(--gold); }
+  .av .cam { position: absolute; right: -2px; bottom: -2px; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); border: 2px solid var(--night); display: grid; place-items: center; font: 700 14px/1 DM; color: var(--night); }
+  .cptip { margin: 22px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.07); font: 500 13px/1.45 DM; color: var(--mute); }
+  .cptip b { color: var(--gold); }
+  .cm:focus-visible, .cpx:focus-visible, button.mate:focus-visible, .crewpick:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 12px; }
+  select.field { appearance: auto; }
+  /* photo albums by day */
+  .albums { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--W) * .025); margin-top: 4%; }
+  .alb { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: calc(var(--W) * .03) calc(var(--W) * .035); border-radius: 16px; text-decoration: none; color: var(--night);
+         background: var(--c); border: 0; text-align: left; min-height: calc(var(--W) * .17); box-shadow: 0 6px 16px rgba(0,0,0,.3); }
+  .alb b { font: 400 calc(var(--W) * .06)/1 Bebas; letter-spacing: .05em; }
+  .alb span { font: 700 calc(var(--W) * .027)/1.2 DM; }
+  .alb.today { outline: 3px solid #fff; outline-offset: 2px; }
+  .alb:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
   .mate.add { border: 0; background: none; padding: 0; cursor: pointer; }
   .crewsheet { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; padding: 20px; background: rgba(8,5,20,.65); backdrop-filter: blur(4px); }
   .crewsheet[hidden] { display: none; }
@@ -342,22 +375,31 @@
   <button type="button" class="mitem" id="homeBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg></span>Home</button>
   <button type="button" class="mitem" id="mapBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>The map</button>
   <button type="button" class="mitem" id="flyBtn" aria-haspopup="dialog" aria-controls="fsheet"><span class="mic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>Flights &amp; vans</button>
-  <button type="button" class="mitem" id="crewBtn" aria-haspopup="dialog" aria-controls="crewSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 6 4.9"/></svg></span>Add me to the crew</button>
+  <button type="button" class="mitem" id="crewBtn" aria-haspopup="dialog" aria-controls="crewSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 6 4.9"/></svg></span>Meet the crew</button>
+  <button type="button" class="mitem" id="albumBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>Photo albums</button>
   <button type="button" class="mitem dim" id="adminBtn" aria-haspopup="dialog" aria-controls="adminSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>Admin</button>
 </div>
 <button class="nowplaying" id="musicBtn" type="button" aria-label="Play music" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><i></i><i></i><i></i></button>
+<section class="crewpage" id="crewPage" role="dialog" aria-modal="true" aria-labelledby="crewPageTitle" hidden>
+  <div class="cpwrap">
+    <div class="cphead"><div><div class="cpk">EVERYONE ON THE TRIP</div><div class="cps">Meet the</div><h2 class="cph" id="crewPageTitle">Crew</h2></div>
+      <button type="button" class="cpx" id="crewPageClose">&#10005; Back</button></div>
+    <div class="cpgrid" id="crewGrid"></div>
+    <p class="cptip">Tap your own circle to add or change your photo. Someone else coming? Tap <b>+ Add someone</b>.</p>
+  </div>
+</section>
 <section class="crewsheet" id="crewSheet" role="dialog" aria-modal="true" aria-labelledby="crewTitle" hidden>
   <form class="crewcard" id="crewForm" novalidate>
-    <div class="crewhead"><b id="crewTitle">Join the crew wall</b><button type="button" class="mx2" id="crewClose" aria-label="Close">&#10005;</button></div>
-    <p class="crewlead">Your first name and a photo show on the countdown page so everyone sees who’s coming.</p>
-    <label class="crewlbl" for="crewName">First name</label>
-    <input class="field" id="crewName" autocomplete="given-name" placeholder="First name">
+    <div class="crewhead"><b id="crewTitle">Add someone</b><button type="button" class="mx2" id="crewClose" aria-label="Close">&#10005;</button></div>
+    <p class="crewlead" id="crewLead"></p>
+    <div id="crewNameWrap"><label class="crewlbl" for="crewName">First name</label>
+    <input class="field" id="crewName" autocomplete="off" placeholder="First name"></div>
     <div id="crewPhotoWrap">
-      <label class="crewpick" for="crewFile"><span class="crewprev" id="crewPrev">+</span><span id="crewPickTxt">Add a photo (optional)</span></label>
+      <label class="crewpick" for="crewFile" id="crewPick" tabindex="0"><span class="crewprev" id="crewPrev">+</span><span id="crewPickTxt">Pick a photo</span></label>
       <input type="file" id="crewFile" accept="image/*" hidden>
     </div>
-    <p class="crewlead" id="crewSoon" hidden>Photo uploads are almost ready. For now you’ll show with your initials.</p>
-    <button class="popbtn" type="submit" id="crewGo">Put me on the wall</button>
+    <p class="crewlead" id="crewSoon" hidden>Photo uploads are almost ready.</p>
+    <button class="popbtn" type="submit" id="crewGo">Add to the crew</button>
     <div class="crewnote" id="crewNote" role="status" aria-live="polite"></div>
   </form>
 </section>
@@ -456,17 +498,17 @@
       '<div class="legend"><span style="--c:var(--coral)">THU</span><span style="--c:var(--gold)">FRI</span><span style="--c:var(--teal)">SAT</span><span style="--c:#FF9FBE">SUN</span></div>' +
       '</div>',
     rsvp: () =>
-      '<div class="panel">' + panelBg('bg-rsvp.jpg') +
+      '<div class="panel rsvppanel">' + panelBg('bg-rsvp.jpg') +
       '<div class="kick">ROLL CALL</div><div class="script">So…</div><div class="huge">Who’s in?</div>' +
       '<form id="rsvpForm" style="width:100%" novalidate>' +
-      '<label class="qlabel" for="rsvpName">Your name</label>' +
-      '<input class="field" id="rsvpName" name="name" autocomplete="given-name" placeholder="First name is fine">' +
+      '<label class="qlabel" for="rsvpPick">Your name</label>' +
+      '<select class="field" id="rsvpPick" aria-label="Pick your name"></select>' +
+      '<input class="field" id="rsvpName" name="name" autocomplete="given-name" placeholder="Type your first name" hidden style="margin-top:8px">' +
       '<div class="choices" role="group" aria-label="Are you in?">' +
         ['I’m in!', 'Maybe', 'Can’t make it'].map(a => '<button type="button" class="choice" data-a="' + esc(a) + '" aria-pressed="false">' + esc(a) + '</button>').join('') +
       '</div><div class="btnrow"><button class="btn" type="submit">Send it</button></div>' +
       '<div class="note" id="rsvpNote" aria-live="polite"></div></form>' +
       '<div class="btnrow" style="margin-top:1%"><a class="btn ghost" id="playlistBtn" href="#" target="_blank" rel="noopener">&#9654; The trip playlist</a></div>' +
-      '<div class="note">Tip: tap Share, then Add to Home Screen, to keep this like an app.</div>' +
       '</div>',
     vote: () =>
       '<div class="panel">' + panelBg('bg-cruise.jpg') +
@@ -483,10 +525,10 @@
       '</div>',
     photos: () =>
       '<div class="panel">' + panelBg('bg-view.jpg') +
-      '<div class="kick">ONE SHARED ALBUM</div><div class="script">Drop your</div><div class="huge">Photos</div>' +
-      '<a class="dropbtn" id="photosBtn" href="#" target="_blank" rel="noopener"><span class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>' +
-        '<span><b>Add photos</b><span id="photosNote">Opens the family album. Tap + and pick your shots.</span></span></a>' +
-      '<div class="steps"><div><i>1</i>Tap Add photos</div><div><i>2</i>Tap + in the album</div><div><i>3</i>Pick as many as you want</div></div>' +
+      '<div class="kick">ONE ALBUM PER DAY</div><div class="script">Drop your</div><div class="huge">Photos</div>' +
+      '<div class="albums" id="albums">' + [['thu', 'Thursday', 'var(--coral)'], ['fri', 'Friday', 'var(--gold)'], ['sat', 'Saturday', 'var(--teal)'], ['sun', 'Sunday', '#FF9FBE']].map(([k, d, c]) =>
+        '<a class="alb" data-album="' + k + '" href="#" target="_blank" rel="noopener" style="--c:' + c + '"><b>' + d + '</b><span>Add photos &rarr;</span></a>').join('') + '</div>' +
+      '<div class="steps"><div><i>1</i>Tap the day</div><div><i>2</i>Tap + in the album</div><div><i>3</i>Pick your shots</div></div>' +
       '</div>'
   };
 
@@ -596,6 +638,7 @@
   $('rsvpForm').addEventListener('submit', e => {
     e.preventDefault();
     const name = $('rsvpName').value.trim();
+    if (name) store.set('cousins-name', name);
     if (!name) { $('rsvpNote').textContent = 'Add your name first.'; $('rsvpName').focus(); return; }
     if (!rsvpAns) { $('rsvpNote').textContent = 'Pick one: I’m in, Maybe, or Can’t make it.'; return; }
     if (!rsvpOn) { $('rsvpNote').textContent = 'Preview mode: the RSVP form isn’t connected yet.'; return; }
@@ -644,9 +687,13 @@
   });
   loadResults();
 
-  const ph = $('photosBtn');
-  if (C.photosUrl) ph.href = C.photosUrl;
-  else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album link is coming soon.'; ph.addEventListener('click', e => { e.preventDefault(); pop({ kind: 'dup', title: 'Almost ready', msg: 'The shared album link is coming soon. Check back here to drop your photos.' }); }); }
+  /* photo albums: one per day, falling back to the main album until a day's link is set */
+  document.querySelectorAll('[data-album]').forEach(el => {
+    const url = (C.photoAlbums || {})[el.dataset.album] || C.photosUrl;
+    if (url) el.href = url;
+    else { el.setAttribute('aria-disabled', 'true'); el.addEventListener('click', e => { e.preventDefault(); pop({ kind: 'dup', title: 'Almost ready', msg: 'The album links are coming soon.' }); }); }
+  });
+  $('albumBtn').addEventListener('click', () => go(pages.findIndex(p => p.kind === 'photos')));
 
   /* music: play/stop from the menu; a small pulsing note shows while it plays (tap it to stop) */
   const music = $('music'), mb = $('musicBtn');
@@ -754,7 +801,8 @@
     if (!(startAt >= 0)) startAt = pages.findIndex(p => p.day === todayKey);
     hint.textContent = 'It’s trip day! Here’s what’s on today →';
   }
-  if (todayKey) { const t = document.querySelector('#dayTabs [data-day="' + todayKey + '"]'); if (t) t.classList.add('today'); }
+  if (todayKey) { const t = document.querySelector('#dayTabs [data-day="' + todayKey + '"]'); if (t) t.classList.add('today');
+    const al = document.querySelector('[data-album="' + todayKey + '"]'); if (al) al.classList.add('today'); }
   /* next up: during the trip, the first page shows the next stop for today (test with ?today=2027-07-24&now=13:00) */
   if (todayKey) {
     const qs = new URLSearchParams(location.search);
@@ -773,78 +821,126 @@
   if (startAt > 0) { track.style.scrollBehavior = 'auto'; track.scrollLeft = startAt * track.clientWidth; track.style.scrollBehavior = ''; }
   update(); motion();
 
-  /* who's coming wall: names from the trackers form ("Crew" rows); RSVP "I'm in" adds you; photos via Cloudinary when set up */
+  /* the crew: everyone on the trip (preloaded roster from config + anyone added later), photos via Cloudinary.
+     Shown as a strip on the countdown page and as a full "Meet the crew" page. Also feeds the "pick your name" lists. */
   (function () {
     const T = C.trackers || {}, CL = C.cloudinary || {};
     const canPost = !!(T.action && T.entries && T.entries.tracker), canRead = !!T.csv, canPhoto = !!(CL.cloud && CL.preset);
     const COLORS = ['#6FE0D2', '#FFC857', '#FF8A66', '#FF9FBE', '#B9A5FF', '#8FD694'];
     const colorOf = n => COLORS[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
-    let crew = new Map();
+    const base = () => new Map((C.roster || []).map(n => [n.toLowerCase(), { name: n, photo: '', status: '' }]));
+    let crew = base();
     const parse = text => { const rows = []; let row = [], cur = '', q = false;
       for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
         else if (c === '"') q = true; else if (c === ',') { row.push(cur); cur = ''; } else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; } else cur += c; }
       if (cur !== '' || row.length) { row.push(cur); rows.push(row); } return rows; };
+    const people = () => [...crew.values()];
+    window.cousinsNames = () => people().map(m => m.name);
+    const badge = (m, big) => '<div class="av' + (big ? ' big' : '') + '" style="--c:' + colorOf(m.name) + (m.photo ? ';background-image:url(' + esc(m.photo) + ')' : '') + '">' +
+      (m.photo ? '' : esc(m.name.slice(0, 1).toUpperCase())) + (big && !m.photo ? '<span class="cam" aria-hidden="true">+</span>' : '') + '</div>';
     function render() {
-      const row = $('crewRow'); if (!row) return;
-      const list = [...crew.values()].filter(m => !/^out/i.test(m.status || ''));
-      row.innerHTML = list.map(m => '<div class="mate"><div class="av" style="--c:' + colorOf(m.name) + (m.photo ? ';background-image:url(' + esc(m.photo) + ')' : '') + '">' + (m.photo ? '' : esc(m.name.slice(0, 1).toUpperCase())) + '</div><small>' + esc(m.name) + '</small></div>').join('') +
-        '<button type="button" class="mate add" id="crewAdd" aria-label="Add yourself to the crew wall"><div class="av">+</div><small>' + (list.length ? 'Add me' : 'Be first') + '</small></button>';
+      const list = people();
+      const row = $('crewRow');
+      if (row) row.innerHTML = list.map(m => '<button type="button" class="mate' + (/^out/i.test(m.status) ? ' out' : '') + '" data-crew="open">' + badge(m) + '<small>' + esc(m.name) + '</small></button>').join('') +
+        '<button type="button" class="mate add" data-crew="open" aria-label="See everyone"><div class="av">&rarr;</div><small>See all</small></button>';
+      $('crewGrid').innerHTML = list.map(m => '<button type="button" class="cm' + (/^out/i.test(m.status) ? ' out' : '') + '" data-who="' + esc(m.name) + '" aria-label="' + esc(m.name) + (m.photo ? ', change photo' : ', add a photo') + '">' + badge(m, true) +
+        '<b>' + esc(m.name) + '</b><i>' + (/^out/i.test(m.status) ? 'Can’t make it' : m.photo ? '' : 'Add a photo') + '</i></button>').join('') +
+        '<button type="button" class="cm add" data-who="" aria-label="Add someone new to the trip"><div class="av big">+</div><b>Add someone</b><i>New to the trip</i></button>';
+      document.querySelectorAll('select.namepick').forEach(fillPicker);
     }
     function load() {
-      if (!canRead) { render(); return; }
+      render();
+      if (!canRead) return;
       fetch(T.csv + (T.csv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
         const rows = parse(t); if (!rows.length) return;
         const head = rows[0].map(h => h.trim().toLowerCase()); const col = k => head.findIndex(h => h === k || h.startsWith(k));
         const ci = { t: col('tracker'), n: col('name'), p: col('photo'), s: col('status') };
-        const m = new Map();
+        const m = base();
         rows.slice(1).forEach(r => { if (!/^crew/i.test((r[ci.t] || '').trim())) return; const n = (r[ci.n] || '').trim(); if (!n) return;
-          const prev = m.get(n.toLowerCase()) || {}; m.set(n.toLowerCase(), { name: n, photo: (r[ci.p] || '').trim() || prev.photo || '', status: (r[ci.s] || '').trim() }); });
+          const k = n.toLowerCase(), prev = m.get(k) || { name: n, photo: '', status: '' };
+          m.set(k, { name: prev.name, photo: (r[ci.p] || '').trim() || prev.photo, status: (r[ci.s] || '').trim() || prev.status }); });
         crew = m; render();
-      }).catch(render);
+      }).catch(() => {});
     }
     function post(fields) {
       const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => { const e = T.entries[k]; if (e && v) fd.append(e, v); });
       return fetch(T.action, { method: 'POST', mode: 'no-cors', body: fd });
     }
-    window.cousinsCrewAdd = (name, status) => { if (!canPost || !name) return; post({ tracker: 'Crew', name, status }).then(() => { const k = name.toLowerCase(); crew.set(k, Object.assign({}, crew.get(k) || {}, { name, status })); render(); }); };
-    // shrink the photo on the phone before uploading
+    function remember(name, status, photo) { const k = name.toLowerCase(), prev = crew.get(k) || { name, photo: '', status: '' }; crew.set(k, { name: prev.name, photo: photo || prev.photo, status: status || prev.status }); render(); }
+    window.cousinsCrewAdd = (name, status) => { if (!canPost || !name) return; post({ tracker: 'Crew', name, status }).then(() => remember(name, status)); };
+
+    /* "pick your name" lists: everyone on the crew, plus "someone new" for a typed name */
+    function fillPicker(sel) {
+      const cur = sel.value, names = window.cousinsNames();
+      sel.innerHTML = '<option value="">Pick your name</option>' + names.map(n => '<option>' + esc(n) + '</option>').join('') + '<option value="__new">Someone new…</option>';
+      if (cur && (cur === '__new' || names.includes(cur))) sel.value = cur;
+    }
+    window.cousinsNamePicker = (sel, input) => {
+      sel.classList.add('namepick'); fillPicker(sel);
+      const saved = store.get('cousins-name');
+      if (saved && window.cousinsNames().includes(saved)) { sel.value = saved; input.value = saved; }
+      const sync = () => { const v = sel.value; if (v === '__new') { input.hidden = false; input.value = ''; input.focus(); } else { input.hidden = true; input.value = v; } };
+      sel.addEventListener('change', sync); input.hidden = sel.value !== '__new';
+    };
+
+    /* crew page */
+    const page = $('crewPage'); let pageBack;
+    function openPage() { pageBack = document.activeElement; page.hidden = false; document.body.classList.add('fopen'); render(); setTimeout(() => $('crewPageClose').focus(), 30); }
+    function closePage() { page.hidden = true; document.body.classList.remove('fopen'); pageBack && pageBack.focus && pageBack.focus(); }
+    $('crewBtn').addEventListener('click', openPage);
+    $('crewPageClose').addEventListener('click', closePage);
+    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' && $('crewSheet').hidden) closePage(); });
+    document.addEventListener('click', e => { if (e.target.closest('[data-crew="open"]')) openPage(); });
+
+    /* photo card: for someone on the list, or to add someone new */
     const shrink = file => new Promise((res, rej) => { const img = new Image(); img.onload = () => { const m = 640, k = Math.min(1, m / Math.max(img.width, img.height));
       const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
       cv.toBlob(b => b ? res(b) : rej(new Error('photo')), 'image/jpeg', .85); URL.revokeObjectURL(img.src); }; img.onerror = rej; img.src = URL.createObjectURL(file); });
-    let picked = null, back;
+    let picked = null, back, forWho = '';
     const sheet = $('crewSheet');
-    function open() { back = document.activeElement; sheet.hidden = false; $('crewPhotoWrap').hidden = !canPhoto; $('crewSoon').hidden = canPhoto; $('crewNote').textContent = '';
-      const saved = store.get('cousins-name'); if (saved && !$('crewName').value) $('crewName').value = saved; setTimeout(() => $('crewName').focus(), 30); }
-    function close() { sheet.hidden = true; back && back.focus && back.focus(); }
-    $('crewBtn').addEventListener('click', open);
-    document.addEventListener('click', e => { if (e.target.closest('#crewAdd')) open(); });
-    $('crewClose').addEventListener('click', close);
-    sheet.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') close(); });
-    sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+    function resetPick() { picked = null; $('crewFile').value = ''; $('crewPrev').style.backgroundImage = ''; $('crewPrev').textContent = '+'; $('crewPickTxt').textContent = 'Pick a photo'; }
+    function openCard(who) {
+      back = document.activeElement; forWho = who; resetPick(); sheet.hidden = false; $('crewNote').textContent = '';
+      const m = who ? crew.get(who.toLowerCase()) : null;
+      $('crewTitle').textContent = who ? (m && m.photo ? 'Change ' + who + '’s photo' : 'Add ' + who + '’s photo') : 'Add someone';
+      $('crewLead').textContent = who ? 'A close-up of your face works best. It shows on the crew page and the countdown page.' : 'Someone new coming on the trip? Add their first name, and a photo if you have one.';
+      $('crewNameWrap').hidden = !!who; $('crewName').value = '';
+      $('crewPhotoWrap').hidden = !canPhoto; $('crewSoon').hidden = canPhoto;
+      if (m && m.photo) { $('crewPrev').style.backgroundImage = 'url(' + m.photo + ')'; $('crewPrev').textContent = ''; $('crewPickTxt').textContent = 'Tap to pick a new photo'; }
+      $('crewGo').textContent = who ? 'Save photo' : 'Add to the crew';
+      setTimeout(() => (who ? $('crewPick') : $('crewName')).focus(), 30);
+    }
+    function closeCard() { sheet.hidden = true; back && back.focus && back.focus(); }
+    $('crewGrid').addEventListener('click', e => { const b = e.target.closest('[data-who]'); if (b) openCard(b.dataset.who); });
+    $('crewClose').addEventListener('click', closeCard);
+    sheet.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') closeCard(); });
+    sheet.addEventListener('click', e => { if (e.target === sheet) closeCard(); });
     $('crewFile').addEventListener('change', () => { const f = $('crewFile').files[0]; if (!f) return; picked = f;
       $('crewPrev').style.backgroundImage = 'url(' + URL.createObjectURL(f) + ')'; $('crewPrev').textContent = ''; $('crewPickTxt').textContent = 'Looking good. Tap to change it.'; });
     $('crewForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const name = $('crewName').value.trim();
-      if (!name) { $('crewNote').textContent = 'Add your first name.'; $('crewName').focus(); return; }
-      if (!canPost) { pop({ kind: 'dup', title: 'Almost ready', msg: 'The crew wall isn’t connected yet.' }); return; }
-      $('crewGo').disabled = true; $('crewNote').textContent = picked ? 'Uploading your photo…' : 'Adding you…';
+      const name = forWho || $('crewName').value.trim();
+      if (!name) { $('crewNote').textContent = 'Add their first name.'; $('crewName').focus(); return; }
+      if (!forWho && crew.has(name.toLowerCase())) { $('crewNote').textContent = name + ' is already on the crew. Tap their circle to add a photo.'; return; }
+      if (forWho && !picked) { $('crewNote').textContent = 'Pick a photo first.'; return; }
+      if (!canPost) { pop({ kind: 'dup', title: 'Almost ready', msg: 'The crew page isn’t connected yet.' }); return; }
+      $('crewGo').disabled = true; $('crewNote').textContent = picked ? 'Uploading the photo…' : 'Adding…';
       try {
         let photo = '';
         if (picked && canPhoto) {
           const fd = new FormData(); fd.append('file', await shrink(picked)); fd.append('upload_preset', CL.preset); fd.append('folder', 'cousins-crew');
           const j = await fetch('https://api.cloudinary.com/v1_1/' + encodeURIComponent(CL.cloud) + '/image/upload', { method: 'POST', body: fd }).then(r => r.json());
           if (!j.secure_url) throw new Error((j.error && j.error.message) || 'upload');
-          photo = j.secure_url.replace('/upload/', '/upload/c_fill,g_face,w_200,h_200,q_auto,f_auto/');
+          photo = j.secure_url.replace('/upload/', '/upload/c_fill,g_face,w_240,h_240,q_auto,f_auto/');
         }
         await post({ tracker: 'Crew', name, photo, status: 'in' });
-        store.set('cousins-name', name);
-        const k = name.toLowerCase(); crew.set(k, { name, photo: photo || (crew.get(k) || {}).photo || '', status: 'in' }); render();
-        close(); picked = null; $('crewFile').value = ''; $('crewPrev').style.backgroundImage = ''; $('crewPrev').textContent = '+'; $('crewPickTxt').textContent = 'Add a photo (optional)';
-        pop({ kind: 'ok', title: 'You’re on the wall', msg: 'Thanks, ' + name + '! Everyone will see you on the countdown page.' });
+        remember(name, 'in', photo); closeCard();
+        store.set('cousins-name', forWho || name);
+        pop({ kind: 'ok', title: forWho ? 'Photo saved' : 'Added to the crew', msg: forWho ? 'Looking good, ' + name + '! Everyone will see it in a minute or two.' : name + ' is on the crew page now.' });
       } catch (err) { $('crewNote').textContent = 'That didn’t go through. Check your connection and try again.'; }
       finally { $('crewGo').disabled = false; }
     });
+    window.cousinsNamePicker($('rsvpPick'), $('rsvpName'));
     load();
   })();
 

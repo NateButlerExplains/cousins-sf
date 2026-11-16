@@ -309,7 +309,8 @@
     '<div class="fsec"><h3>Departures board</h3><div class="board" id="fDep"></div></div>' +
     '<div class="fsec"><h3>Add my flight</h3><p class="lead">Changed plans? Send it again with the same first name and the board updates.</p>' +
       '<form class="fform" id="fForm" novalidate>' +
-        '<label>First name<input class="ffield" name="name" autocomplete="given-name" required></label>' +
+        '<label>Your name<select class="ffield" id="fPick"></select></label>' +
+        '<input class="ffield" name="name" id="fName" autocomplete="given-name" placeholder="Type your first name" hidden>' +
         '<div class="grp">Landing at SFO</div>' +
         '<div class="fgrid"><label>Airline<select class="ffield" name="arrAirline">' + airlineOpts + '</select></label>' +
         '<label>Day<select class="ffield" name="arrDate">' + opt(['Thu Jul 22', 'Wed Jul 21', 'Fri Jul 23']) + '</select></label>' +
@@ -349,7 +350,7 @@
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.target).entries());
     const note = document.getElementById('fNote');
-    if (!f.name.trim()) { note.textContent = 'Add your first name.'; return; }
+    if (!f.name.trim()) { note.textContent = 'Pick your name first.'; return; }
     if (!f.arrTime) { note.textContent = 'Add the time you land.'; return; }
     if (!canSubmit) { note.textContent = 'Preview mode: the flights form isn’t connected yet.'; return; }
     const pop = window.cousinsPop || (o => { note.textContent = o.title + '. ' + (o.msg || ''); });
@@ -377,6 +378,8 @@
     send();
   });
 
+  if (window.cousinsNamePicker) window.cousinsNamePicker(document.getElementById('fPick'), document.getElementById('fName'));
+  else document.getElementById('fName').hidden = false;
   load(); loadQuotes();
   if (location.hash === '#flights') open();
 })();
