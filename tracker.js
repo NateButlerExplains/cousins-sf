@@ -103,7 +103,7 @@
   function adminBar(current) {
     if (!isAdmin()) return;
     document.body.classList.add('admin');
-    const links = [['main', 'Main site', '../'], ['shuttle', 'Shuttle tracker', '../shuttle/'], ['stays', 'Stays tracker', '../stays/']];
+    const links = [['main', 'Main site', '../'], ['admin', 'Admin', '../admin/'], ['shuttle', 'Shuttle tracker', '../shuttle/'], ['stays', 'Stays tracker', '../stays/']];
     const bar = document.createElement('nav'); bar.className = 'adminbar'; bar.setAttribute('aria-label', 'Admin');
     bar.innerHTML = '<b>ADMIN</b>' + links.map(([k, label, href]) => '<a href="' + href + '"' + (k === current ? ' aria-current="page"' : '') + '>' + label + '</a>').join('');
     document.body.appendChild(bar);
