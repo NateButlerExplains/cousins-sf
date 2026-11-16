@@ -317,6 +317,21 @@
   .crewpick { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; border: 1.5px dashed rgba(255,200,87,.6); color: #fff; font: 600 15px/1.3 DM; cursor: pointer; }
   .crewprev { width: 56px; height: 56px; flex: none; border-radius: 50%; background: rgba(255,200,87,.15) center / cover no-repeat; display: grid; place-items: center; color: var(--gold); font: 700 26px/1 DM; }
   .recsheet { overflow-y: auto; align-items: start; }
+  .rcard { cursor: pointer; }
+  .rmore { display: inline-flex; align-items: center; gap: 4px; margin: 10px 0 0 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); background: none; color: #fff; font: 700 13px/1 DM; cursor: pointer; vertical-align: top; }
+  .rmore:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .rdcard { padding: 0; overflow: hidden; }
+  .rdcard .rdimg { aspect-ratio: 16 / 9; background: #000 center / cover no-repeat; }
+  .rdbody { display: grid; gap: 10px; padding: 16px 20px 20px; }
+  .rdbody h3 { margin: 0; font: 400 32px/1 Anton; text-transform: uppercase; color: #fff; }
+  .rdbody > p { margin: 0; font: 500 15px/1.5 DM; color: var(--mute); }
+  .rdsec h4 { margin: 4px 0 6px; font: 700 11px/1 DM; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .rdsec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .rdsec li { position: relative; padding-left: 20px; font: 500 14.5px/1.45 DM; color: #fff; }
+  .rdsec li::before { content: ''; position: absolute; left: 4px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+  .rdsec.tips li::before { content: '★'; width: auto; height: auto; background: none; color: var(--gold); font-size: 12px; top: .1em; left: 0; }
+  .rdgo { display: grid; place-items: center; text-decoration: none; margin-top: 4px; }
+  .rdx { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,.55); }
   .recsheet .crewcard { margin: auto 0; gap: 8px; }
   .recsheet .field { width: 100%; }
   .recsheet textarea.field { min-height: 64px; padding-top: 12px; resize: vertical; font: inherit; }
@@ -484,6 +499,13 @@
     <button class="popbtn" type="submit" id="recGo">Add it</button>
     <div class="crewnote" id="recNote" role="status" aria-live="polite"></div>
   </form>
+</section>
+<section class="crewsheet recsheet" id="recDetail" role="dialog" aria-modal="true" aria-labelledby="rdTitle" hidden>
+  <div class="crewcard rdcard" style="position:relative">
+    <button type="button" class="mx2 rdx" id="rdClose" aria-label="Close">&#10005;</button>
+    <div class="rdimg" id="rdImg" hidden></div>
+    <div class="rdbody"><h3 id="rdTitle"></h3><p id="rdText"></p><div id="rdMore"></div></div>
+  </div>
 </section>
 <button class="nav prev" id="prev" aria-label="Previous page">&#8249;</button>
 <button class="nav next" id="next" aria-label="Next page">&#8250;</button>
@@ -790,9 +812,10 @@
     }
     const card = (it, k) => {
       const ph = it.photo || it.img;
-      return '<div class="rcard">' + (ph || it.wiki ? '<div class="rimg" data-k="' + k + '"><img alt="" loading="lazy" decoding="async"' + (ph ? ' src="' + esc(ph) + '"' : '') + '></div>' : '') +
+      return '<div class="rcard" data-k="' + k + '">' + (ph || it.wiki ? '<div class="rimg" data-k="' + k + '"><img alt="" loading="lazy" decoding="async"' + (ph ? ' src="' + esc(ph) + '"' : '') + '></div>' : '') +
         '<div class="rtxt"><b>' + esc(it.title) + '</b>' + (it.text ? '<p>' + esc(it.text) + '</p>' : '') + (it.by ? '<i>Added by ' + esc(it.by) + '</i>' : '') +
-        (it.where ? '<a class="rgo" href="' + esc(maps(it.where)) + '" target="_blank" rel="noopener">' + (/^https?:/i.test(it.where) ? 'Open link' : 'Take me there') + ' &#8599;</a>' : '') + '</div></div>';
+        (it.where ? '<a class="rgo" href="' + esc(maps(it.where)) + '" target="_blank" rel="noopener">' + (/^https?:/i.test(it.where) ? 'Open link' : 'Take me there') + ' &#8599;</a>' : '') +
+        '<button type="button" class="rmore" data-detail="' + k + '"' + (it.where ? '' : ' style="margin-left:0"') + '>Details &rsaquo;</button></div></div>';
     };
     function photos(sec) {
       $('recsBody').querySelectorAll('.rimg').forEach(box => {
@@ -841,7 +864,25 @@
     function close() { page.hidden = true; document.body.classList.remove('fopen'); back && back.focus && back.focus(); }
     $('recsBtn').addEventListener('click', open);
     $('recsClose').addEventListener('click', close);
-    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' && sheet.hidden) close(); });
+    page.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' && sheet.hidden && det.hidden) close(); });
+
+    /* tap a pick for details: facts and pro tips */
+    const det = $('recDetail'); let dback;
+    const list = (cls, h, a) => a && a.length ? '<div class="rdsec ' + cls + '"><h4>' + h + '</h4><ul>' + a.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
+    function openDetail(k) {
+      const it = R[cur].items[k]; if (!it) return; dback = document.activeElement;
+      const ph = it.photo || it.img || (it.wiki && wcache[it.wiki] && wcache[it.wiki].src) || '';
+      $('rdImg').hidden = !ph; $('rdImg').style.backgroundImage = ph ? 'url("' + ph + '")' : '';
+      $('rdTitle').textContent = it.title; $('rdText').textContent = it.text || ''; $('rdText').hidden = !it.text;
+      $('rdMore').innerHTML = list('facts', 'Quick facts', it.facts) + list('tips', 'Pro tips', it.tips) + (it.by ? '<p class="crewlead">Added by ' + esc(it.by) + '</p>' : '') +
+        (it.where ? '<a class="popbtn rdgo" href="' + esc(maps(it.where)) + '" target="_blank" rel="noopener">' + (/^https?:/i.test(it.where) ? 'Open link' : 'Take me there') + ' &#8599;</a>' : '');
+      det.hidden = false; det.scrollTop = 0; setTimeout(() => $('rdClose').focus(), 30);
+    }
+    function closeDetail() { det.hidden = true; dback && dback.focus && dback.focus(); }
+    $('recsBody').addEventListener('click', e => { if (e.target.closest('a,[data-add]')) return; const b = e.target.closest('[data-detail]') || e.target.closest('.rcard[data-k]'); if (b) openDetail(+(b.dataset.detail || b.dataset.k)); });
+    $('rdClose').addEventListener('click', closeDetail);
+    det.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') closeDetail(); });
+    det.addEventListener('click', e => { if (e.target === det) closeDetail(); });
 
     /* the + button: add a pick (or a photo for one that's already listed) */
     const sheet = $('recSheet'); let addTo = 0, picked = null, sback, pickerReady = false;
