@@ -26,6 +26,8 @@ window.TRIP_CONFIG = {
                luggage: 'entry.1933466509', tracking: 'entry.1220163658', fees: 'entry.758034803', status: 'entry.257300097', notes: 'entry.1600394314' },
     csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9-RNj8b4nTa6JVflze5_I-SSF6Cjizc55vzj_-FqaAsmcZsaSDUNjb4SZBi2q02bAZ2uAY3yvfh6P/pub?gid=1511093900&single=true&output=csv'
   },
+  // Crew wall photos: Cloudinary cloud name + an UNSIGNED upload preset (never the API secret)
+  cloudinary: { cloud: '', preset: '' },
   // CARTO basemap key for the map page (CARTO keys are meant to be used in the browser).
   cartoKey: 'cb1_5980_1_5f1902b93a960f2bc86759a5',
   // Passcode gate. Leave empty to turn the gate off. This is a hash of the word, not the word itself.

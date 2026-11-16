@@ -17,6 +17,12 @@
   .votes { display: flex; align-items: center; gap: 8px; font: 700 13px/1.3 DM; color: var(--mute); }
   .votes b { font: 400 30px/1 Bebas; color: var(--gold); }
   .lead-badge { position: absolute; left: 10px; top: 10px; padding: 6px 10px; border-radius: 999px; background: var(--gold); color: var(--night); font: 700 12px/1 DM; letter-spacing: .06em; }
+  .leader { position: relative; display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; margin: 0 0 14px; padding: 12px; border-radius: 20px;
+            background: linear-gradient(135deg, #FFC857, #FF9A45); color: var(--night); border: 0; width: 100%; text-align: left; cursor: pointer; }
+  .leader .lp { width: 120px; aspect-ratio: 3 / 2; border-radius: 12px; background: rgba(18,11,39,.25) center / cover no-repeat; display: grid; place-items: center; font: 700 12px/1 DM; }
+  .leader i { display: block; font: 700 11px/1 DM; font-style: normal; letter-spacing: .16em; }
+  .leader b { display: block; font: 400 28px/1.02 Bebas; letter-spacing: .03em; margin: 4px 0; }
+  .leader span { font: 600 13px/1.35 DM; }
   .preview { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1.5px solid var(--line); }
   .preview img { width: 120px; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 10px; display: block; }
   .cmpbar { position: sticky; bottom: 12px; z-index: 5; display: flex; justify-content: center; margin-top: 14px; }
@@ -58,6 +64,7 @@
       </div>
       <button class="btn small ghost" type="button" id="jumpAdd">+ Add a house</button>
     </div>
+    <div id="leader"></div>
     <div id="list"></div>
     <div class="cmpbar" id="cmpBar" hidden><button class="btn" type="button" id="cmpGo"></button></div>
   </section>
@@ -127,7 +134,7 @@
   const me = () => (store.get('cousins-name') || '').toLowerCase();
   function render() {
     const list = sorted(), box = $('list');
-    if (!list.length) { box.innerHTML = '<div class="empty">No houses yet. Add the first one below.</div>'; updateBar(); return; }
+    if (!list.length) { box.innerHTML = '<div class="empty">No houses yet. Add the first one below.</div>'; updateBar(); renderLeader(); return; }
     const top = Math.max(...list.map(h => h.voters.length));
     if (view === 'cards') {
       box.innerHTML = '<div class="cards">' + list.map(h => {
@@ -164,7 +171,16 @@
         rows.map(([label, f, k]) => '<tr><th scope="row">' + label + '</th>' + set.map(h => '<td' + (isBest(h, k) ? ' class="best"' : '') + '>' + f(h) + '</td>').join('') + '</tr>').join('') +
         '</table></div><p class="note">Gold marks the best in each row: lowest price, most room, most votes.</p>';
     }
-    updateBar();
+    updateBar(); renderLeader();
+  }
+  function renderLeader() {
+    const box = $('leader'); const ranked = houses.slice().sort((a, b) => b.voters.length - a.voters.length);
+    const top = ranked[0]; if (!top || !top.voters.length) { box.innerHTML = ''; return; }
+    const tied = ranked.filter(h => h.voters.length === top.voters.length);
+    const ph = photosOf(top)[0];
+    box.innerHTML = tied.length > 1
+      ? '<div class="leader" style="cursor:default"><div class="lp">TIE</div><div><i>NECK AND NECK</i><b>' + esc(tied.map(h => h.title || 'Untitled').join(' vs ')) + '</b><span>' + top.voters.length + ' vote' + (top.voters.length > 1 ? 's' : '') + ' each. Your vote breaks the tie.</span></div></div>'
+      : '<button type="button" class="leader" data-view="' + esc(top.key) + '"><div class="lp"' + (ph ? ' style="background-image:url(' + esc(sized(ph, 480)) + ')"' : '') + '>' + (ph ? '' : 'No photo') + '</div><div><i>FAMILY FAVORITE SO FAR</i><b>' + esc(top.title || 'Untitled house') + '</b><span>' + esc(top.voters.join(', ')) + (top.price ? ' · ' + esc(top.price) + ' a night' : '') + '</span></div></button>';
   }
   function updateBar() {
     $('cmpBar').hidden = !(view === 'cards' && picked.size >= 2);

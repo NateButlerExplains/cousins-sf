@@ -79,13 +79,13 @@
   .btnrow { display: flex; flex-wrap: wrap; gap: 10px 3%; justify-content: center; margin-top: 4%; width: 100%; }
   .note { font: 500 calc(var(--W) * .032)/1.35 DM; color: var(--mute); margin-top: 3%; min-height: 1.4em; }
 
-  .num { font: 400 calc(var(--W) * .36)/.86 Anton; color: #fff; text-shadow: 0 10px 50px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+  .num { font: 400 calc(var(--W) * .3)/.86 Anton; color: #fff; text-shadow: 0 10px 50px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
   .days { font: 400 calc(var(--W) * .11)/1 Bebas; letter-spacing: .12em; color: var(--gold); }
   .clock { display: flex; gap: 6%; margin-top: 1%; justify-content: center; width: 100%; }
   .clock div { display: flex; flex-direction: column; align-items: center; }
   .clock b { font: 400 calc(var(--W) * .08)/1 Bebas; color: #fff; font-variant-numeric: tabular-nums; }
   .clock span { font: 700 calc(var(--W) * .024)/1 DM; letter-spacing: .3em; color: var(--mute); margin-top: 4px; }
-  .wx { margin-top: 4%; display: flex; align-items: center; gap: 4%; padding: 2.2% 5%; border-radius: 18px; background: rgba(18,11,39,.6);
+  .wx { margin-top: 3%; display: flex; align-items: center; gap: 4%; padding: 2.2% 5%; border-radius: 18px; background: rgba(18,11,39,.6);
         border: 1.5px solid rgba(111,224,210,.45); font: 500 calc(var(--W) * .034)/1.3 DM; color: #fff; text-align: left; }
   .wx b { font: 400 calc(var(--W) * .085)/1 Bebas; color: var(--teal); white-space: nowrap; }
   .wxdays { display: flex; gap: 3%; margin-top: 3%; width: 100%; justify-content: center; }
@@ -155,6 +155,86 @@
   .acard p { margin: 6px 0 12px; font: 500 14px/1.4 DM; color: var(--mute); }
   .acard .arow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .acard a.popbtn { display: grid; place-items: center; text-decoration: none; }
+  /* countdown page: room for weather + crew wall */
+  .cdpanel .script { font-size: calc(var(--W) * .075); }
+  .cdpanel .num { font-size: calc(var(--W) * .24); }
+  .cdpanel .days { font-size: calc(var(--W) * .085); }
+  .cdpanel .clock b { font-size: calc(var(--W) * .065); }
+  .cdpanel .wx { margin-top: 2.5%; padding: 1.6% 4%; font-size: calc(var(--W) * .029); }
+  .cdpanel .wx b { font-size: calc(var(--W) * .07); }
+  .cdpanel .wxdays { margin-top: 2%; }
+  .cdpanel .crew { margin-top: 3%; }
+  .cdpanel .mate { width: calc(var(--W) * .115); }
+  .cdpanel .mate .av { width: calc(var(--W) * .1); height: calc(var(--W) * .1); font-size: calc(var(--W) * .045); }
+  .cdpanel .btnrow { flex-wrap: nowrap; margin-top: 3%; }
+  .cdpanel .btnrow .btn { padding-left: 4%; padding-right: 4%; font-size: calc(var(--W) * .042); min-height: 0; height: calc(var(--W) * .1); white-space: nowrap; }
+  /* one menu button */
+  .menubtn { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 9; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.35);
+             background: rgba(18,11,39,.62); color: #fff; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(8px); }
+  .menubtn svg { width: 20px; height: 20px; }
+  .menubtn[aria-expanded="true"] { background: var(--gold); color: var(--night); border-color: var(--gold); }
+  .menu { position: fixed; top: calc(66px + env(safe-area-inset-top)); right: 12px; z-index: 9; width: min(250px, calc(100vw - 24px)); padding: 8px; border-radius: 20px;
+          background: rgba(18,11,39,.94); border: 1.5px solid rgba(255,200,87,.45); box-shadow: 0 20px 50px rgba(0,0,0,.55); backdrop-filter: blur(10px);
+          transform-origin: top right; animation: menuIn .18s ease-out; }
+  .menu[hidden] { display: none; }
+  @keyframes menuIn { from { opacity: 0; transform: scale(.92); } }
+  .mitem { width: 100%; min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 6px 10px; border: 0; border-radius: 12px; background: transparent; color: #fff;
+           font: 600 16px/1.2 DM; text-align: left; cursor: pointer; }
+  .mitem:hover, .mitem:focus-visible { background: rgba(255,255,255,.08); outline: none; }
+  .mitem:focus-visible { box-shadow: inset 0 0 0 2px #fff; }
+  .mitem .mic { width: 34px; height: 34px; flex: none; border-radius: 10px; background: rgba(255,200,87,.16); color: var(--gold); display: grid; place-items: center; }
+  .mitem .mic svg { width: 18px; height: 18px; }
+  .mitem.on .mic { background: var(--gold); color: var(--night); }
+  .mitem.dim { color: var(--mute); border-top: 1px solid rgba(255,255,255,.1); border-radius: 0 0 12px 12px; margin-top: 4px; }
+  .mitem.dim .mic { background: rgba(255,255,255,.08); color: var(--mute); }
+  /* music playing: small pulsing bars, tap to stop */
+  .nowplaying { position: fixed; left: 14px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 6; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,200,87,.6);
+                background: rgba(18,11,39,.7); display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 10px; cursor: pointer; }
+  .nowplaying[hidden] { display: none; }
+  .nowplaying i { width: 3px; height: 14px; border-radius: 2px; background: var(--gold); transform-origin: bottom; animation: eq 1s ease-in-out infinite; }
+  .nowplaying i:nth-child(2) { animation-delay: -.35s; } .nowplaying i:nth-child(3) { animation-delay: -.7s; }
+  @keyframes eq { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+  /* day tabs */
+  .daytabs { position: fixed; top: calc(15px + env(safe-area-inset-top)); left: 12px; z-index: 8; display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+             background: rgba(18,11,39,.62); border: 1.5px solid rgba(255,255,255,.22); backdrop-filter: blur(8px); }
+  .daytabs button { min-width: 42px; height: 32px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; color: #fff; font: 400 17px/1 Bebas; letter-spacing: .08em; cursor: pointer; }
+  .daytabs button[aria-current="true"] { color: var(--night); }
+  .daytabs button[data-day="thu"][aria-current="true"] { background: var(--coral); } .daytabs button[data-day="fri"][aria-current="true"] { background: var(--gold); }
+  .daytabs button[data-day="sat"][aria-current="true"] { background: var(--teal); } .daytabs button[data-day="sun"][aria-current="true"] { background: #FF9FBE; }
+  .daytabs button.today::after { content: ''; display: inline-block; width: 5px; height: 5px; margin-left: 4px; border-radius: 50%; background: currentColor; vertical-align: middle; }
+  /* page-turn motion */
+  .slide .card { transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .2s linear; }
+  /* next up (during the trip) */
+  .nextup { position: absolute; left: 50%; bottom: calc(46px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 4; width: min(calc(var(--W) * .9), 92vw);
+            display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; border: 0; background: rgba(18,11,39,.9); box-shadow: 0 14px 34px rgba(0,0,0,.5);
+            color: #fff; text-align: left; cursor: pointer; border-left: 5px solid var(--gold); }
+  .nextup i { font: 700 11px/1 DM; font-style: normal; letter-spacing: .16em; color: var(--gold); display: block; margin-bottom: 4px; }
+  .nextup b { display: block; font: 400 24px/1 Bebas; letter-spacing: .04em; }
+  .nextup span { font: 500 13px/1.3 DM; color: var(--mute); }
+  .nextup .arr { margin-left: auto; font: 700 22px/1 DM; color: var(--gold); }
+  /* crew wall */
+  .crew { width: 100%; margin-top: 4.5%; }
+  .crew .ck { font: 700 calc(var(--W) * .024)/1 DM; letter-spacing: .24em; color: var(--gold); text-align: center; }
+  .crewrow { display: flex; gap: 10px; overflow-x: auto; padding: 8px 2px 2px; justify-content: safe center; scrollbar-width: none; }
+  .crewrow::-webkit-scrollbar { display: none; }
+  .mate { flex: none; width: calc(var(--W) * .13); text-align: center; }
+  .mate .av { width: calc(var(--W) * .12); height: calc(var(--W) * .12); margin: 0 auto; border-radius: 50%; border: 2px solid var(--gold); background: var(--c, #6FE0D2) center / cover no-repeat;
+              display: grid; place-items: center; font: 400 calc(var(--W) * .05)/1 Bebas; color: var(--night); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+  .mate small { display: block; margin-top: 4px; font: 700 calc(var(--W) * .023)/1.1 DM; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mate.add .av { background: rgba(255,200,87,.15); border-style: dashed; color: var(--gold); cursor: pointer; }
+  .mate.add { border: 0; background: none; padding: 0; cursor: pointer; }
+  .crewsheet { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; padding: 20px; background: rgba(8,5,20,.65); backdrop-filter: blur(4px); }
+  .crewsheet[hidden] { display: none; }
+  .crewcard { width: min(360px, 100%); display: grid; gap: 10px; padding: 20px; border-radius: 22px; background: #1A1033; border: 1.5px solid var(--gold); box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+  .crewhead { display: flex; align-items: center; justify-content: space-between; }
+  .crewhead b { font: 400 30px/1 Anton; text-transform: uppercase; color: #fff; }
+  .mx2 { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 16px; cursor: pointer; }
+  .crewlead { margin: 0; font: 500 14px/1.45 DM; color: var(--mute); }
+  .crewlbl { font: 700 11px/1 DM; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+  .crewpick { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; border: 1.5px dashed rgba(255,200,87,.6); color: #fff; font: 600 15px/1.3 DM; cursor: pointer; }
+  .crewprev { width: 56px; height: 56px; flex: none; border-radius: 50%; background: rgba(255,200,87,.15) center / cover no-repeat; display: grid; place-items: center; color: var(--gold); font: 700 26px/1 DM; }
+  .crewnote { min-height: 1.3em; font: 600 13px/1.4 DM; color: var(--mute); }
+  @media (prefers-reduced-motion: reduce) { .nowplaying i { animation: none; } .menu { animation: none; } }
   /* confirmation pop-up */
   .pop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgba(8,5,20,.6); backdrop-filter: blur(4px);
          opacity: 0; pointer-events: none; transition: opacity .2s; }
@@ -233,14 +313,6 @@
 </div>
 
 <main class="track" id="track" aria-label="Cousins Trip San Francisco"></main>
-<div class="topleft">
-  <button class="ibtn" id="homeBtn" aria-label="Back to the first page">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg>
-  </button>
-  <button class="ibtn" id="adminBtn" aria-label="Admin" aria-haspopup="dialog" aria-controls="adminSheet">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
-  </button>
-</div>
 <section class="asheet" id="adminSheet" role="dialog" aria-modal="true" aria-labelledby="adminTitle" hidden>
   <div class="awrap">
     <div class="ahead"><h2 id="adminTitle">Admin</h2><button class="popbtn ghost asmall" id="adminClose" type="button">&#10005; Close</button></div>
@@ -257,17 +329,36 @@
     </div>
   </div>
 </section>
-<div class="topbar">
-  <button class="ibtn" id="mapBtn" aria-label="Go to the map">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
-  </button>
-  <button class="ibtn" id="musicBtn" aria-label="Play music" aria-pressed="false">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-  </button>
-  <button class="ibtn fly" id="flyBtn" aria-label="Flights and van pickups" aria-haspopup="dialog" aria-controls="fsheet">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>
-  </button>
+<nav class="daytabs" id="dayTabs" aria-label="Jump to a day">
+  <button type="button" data-day="thu">Thu</button><button type="button" data-day="fri">Fri</button><button type="button" data-day="sat">Sat</button><button type="button" data-day="sun">Sun</button>
+</nav>
+<button class="menubtn" id="menuBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+</button>
+<div class="menu" id="menu" hidden>
+  <button type="button" class="mitem" id="homeBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg></span>Home</button>
+  <button type="button" class="mitem" id="mapBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>The map</button>
+  <button type="button" class="mitem" id="flyBtn" aria-haspopup="dialog" aria-controls="fsheet"><span class="mic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>Flights &amp; vans</button>
+  <button type="button" class="mitem" id="crewBtn" aria-haspopup="dialog" aria-controls="crewSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 6 4.9"/></svg></span>Add me to the crew</button>
+  <button type="button" class="mitem" id="musicBtn" aria-pressed="false"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span id="musicLabel">Play music</span></button>
+  <button type="button" class="mitem dim" id="adminBtn" aria-haspopup="dialog" aria-controls="adminSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>Admin</button>
 </div>
+<button class="nowplaying" id="nowPlaying" type="button" aria-label="Music is playing. Tap to stop." hidden><i></i><i></i><i></i></button>
+<section class="crewsheet" id="crewSheet" role="dialog" aria-modal="true" aria-labelledby="crewTitle" hidden>
+  <form class="crewcard" id="crewForm" novalidate>
+    <div class="crewhead"><b id="crewTitle">Join the crew wall</b><button type="button" class="mx2" id="crewClose" aria-label="Close">&#10005;</button></div>
+    <p class="crewlead">Your first name and a photo show on the countdown page so everyone sees who’s coming.</p>
+    <label class="crewlbl" for="crewName">First name</label>
+    <input class="field" id="crewName" autocomplete="given-name" placeholder="First name">
+    <div id="crewPhotoWrap">
+      <label class="crewpick" for="crewFile"><span class="crewprev" id="crewPrev">+</span><span id="crewPickTxt">Add a photo (optional)</span></label>
+      <input type="file" id="crewFile" accept="image/*" hidden>
+    </div>
+    <p class="crewlead" id="crewSoon" hidden>Photo uploads are almost ready. For now you’ll show with your initials.</p>
+    <button class="popbtn" type="submit" id="crewGo">Put me on the wall</button>
+    <div class="crewnote" id="crewNote" role="status" aria-live="polite"></div>
+  </form>
+</section>
 <button class="nav prev" id="prev" aria-label="Previous page">&#8249;</button>
 <button class="nav next" id="next" aria-label="Next page">&#8250;</button>
 <nav class="dots" id="dots" aria-label="Pages"></nav>
@@ -346,11 +437,12 @@
 
   const builders = {
     countdown: () =>
-      '<div class="panel">' + panelBg('bridge.jpg') +
+      '<div class="panel cdpanel">' + panelBg('bridge.jpg') +
       '<div class="kick">THE COUNTDOWN IS ON</div><div class="script">San Francisco in</div>' +
       '<div class="num" id="cd-days">0</div><div class="days">DAYS</div>' +
       '<div class="clock" role="timer" aria-live="off"><div><b id="cd-h">00</b><span>HRS</span></div><div><b id="cd-m">00</b><span>MIN</span></div><div><b id="cd-s">00</b><span>SEC</span></div></div>' +
       '<div id="wx"></div>' +
+      '<div class="crew" aria-labelledby="crewK"><div class="ck" id="crewK">WHO’S COMING</div><div class="crewrow" id="crewRow"></div></div>' +
       '<div class="btnrow"><a class="btn" href="cousins-trip.ics" download="cousins-trip.ics">+ iPhone calendar</a><a class="btn ghost" href="' + esc(gcal) + '" target="_blank" rel="noopener">+ Google Calendar</a></div>' +
       '</div>',
     map: () =>
@@ -510,6 +602,8 @@
     if (sent[key]) { pop({ kind: 'dup', title: 'Already sent', msg: 'We already have an answer for ' + name + ' (' + sent[key] + '). No need to send it again.' }); return; }
     submitForm(C.rsvp, { [C.rsvp.nameEntry]: name, [C.rsvp.answerEntry]: rsvpAns }).then(() => {
       sent[key] = rsvpAns; store.set('cousins-rsvp-names', JSON.stringify(sent)); store.set('cousins-rsvp', rsvpAns);
+      if (window.cousinsCrewAdd && rsvpAns === 'I’m in!') window.cousinsCrewAdd(name, 'in');
+      if (window.cousinsCrewAdd && /Can/.test(rsvpAns)) window.cousinsCrewAdd(name, 'out');
       $('rsvpNote').textContent = 'Answer sent for ' + name + '.';
       pop({ kind: 'ok', title: rsvpAns === 'I’m in!' ? 'You’re in!' : 'Got it', msg: rsvpAns === 'I’m in!' ? 'Thanks, ' + name + '. See you in San Francisco!' : 'Thanks, ' + name + '. Your answer is in.' });
     }).catch(() => { pop({ kind: 'err', title: 'Didn’t send', msg: 'Check your connection and try again.' }); });
@@ -552,15 +646,25 @@
   if (C.photosUrl) ph.href = C.photosUrl;
   else { ph.setAttribute('aria-disabled', 'true'); $('photosNote').textContent = 'The album link is coming soon.'; ph.addEventListener('click', e => { e.preventDefault(); pop({ kind: 'dup', title: 'Almost ready', msg: 'The shared album link is coming soon. Check back here to drop your photos.' }); }); }
 
-  /* music: plays only when the music icon is tapped; tap again to stop */
+  /* music: play/stop from the menu; a small pulsing note shows while it plays (tap it to stop) */
   const music = $('music'), mb = $('musicBtn');
-  function setOn(on) { mb.classList.toggle('on', on); mb.setAttribute('aria-pressed', on); mb.setAttribute('aria-label', on ? 'Stop music' : 'Play music'); }
-  mb.addEventListener('click', () => {
-    if (music.paused) { music.volume = .55; music.play().then(() => setOn(true)).catch(() => { setOn(false); toast('Tap the music icon again to play.'); }); }
+  function setOn(on) { mb.classList.toggle('on', on); mb.setAttribute('aria-pressed', on); $('musicLabel').textContent = on ? 'Stop music' : 'Play music'; $('nowPlaying').hidden = !on; }
+  function toggleMusic() {
+    if (music.paused) { music.volume = .55; music.play().then(() => setOn(true)).catch(() => { setOn(false); toast('Tap Play music again.'); }); }
     else { music.pause(); setOn(false); }
-  });
+  }
+  mb.addEventListener('click', toggleMusic);
+  $('nowPlaying').addEventListener('click', () => { music.pause(); setOn(false); });
   music.addEventListener('pause', () => setOn(false));
   document.addEventListener('visibilitychange', () => { if (document.hidden && !music.paused) music.pause(); });
+
+  /* menu */
+  const menu = $('menu'), menuBtn = $('menuBtn');
+  function setMenu(open) { menu.hidden = !open; menuBtn.setAttribute('aria-expanded', open); if (open) setTimeout(() => menu.querySelector('.mitem').focus(), 20); }
+  menuBtn.addEventListener('click', e => { e.stopPropagation(); setMenu(menu.hidden); });
+  menu.addEventListener('click', e => { if (e.target.closest('.mitem')) setMenu(false); });
+  document.addEventListener('click', e => { if (!menu.hidden && !e.target.closest('#menu, #menuBtn')) setMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { setMenu(false); menuBtn.focus(); } }, true);
 
   /* paging */
   let cur = -1;
@@ -608,6 +712,7 @@
         if (c && k !== i) { c.classList.remove('flipped'); c.setAttribute('aria-pressed', 'false'); }
       });
       [...dots.children].forEach((d, k) => { d.classList.toggle('on', k === i); d.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+      document.querySelectorAll('#dayTabs button').forEach(b => b.setAttribute('aria-current', b.dataset.day === pages[i].day ? 'true' : 'false'));
       prev.disabled = i === 0; next.disabled = i === pages.length - 1;
       if (pages[i].kind === 'map') { buildMap(); setTimeout(() => map && map.invalidateSize(), 60); } else if (map) setMapLock(true);
       if (pages[i].kind === 'vote') loadResults();
@@ -615,7 +720,21 @@
     }
     if (i > 0) hint.classList.add('gone');
   }
-  track.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+  /* page-turn motion: photos drift and the card behind fades as you swipe */
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function motion() {
+    if (calm) return;
+    const pos = track.scrollLeft / Math.max(1, track.clientWidth);
+    [...track.children].forEach((sl, k) => {
+      const d = k - pos;
+      if (Math.abs(d) > 1.2) return;
+      const img = sl.querySelector('.face img'), card = sl.querySelector('.card');
+      if (img) img.style.translate = (d * 14) + '% 0';
+      if (card) card.style.opacity = String(1 - Math.min(1, Math.abs(d)) * .35);
+    });
+  }
+  track.addEventListener('scroll', () => requestAnimationFrame(() => { update(); motion(); }), { passive: true });
+  document.querySelectorAll('#dayTabs button').forEach(b => b.addEventListener('click', () => go(pages.findIndex(p => p.day === b.dataset.day))));
   prev.addEventListener('click', () => go(cur - 1));
   next.addEventListener('click', () => go(cur + 1));
   addEventListener('keydown', e => {
@@ -634,8 +753,99 @@
     if (!(startAt >= 0)) startAt = pages.findIndex(p => p.day === todayKey);
     hint.textContent = 'It’s trip day! Here’s what’s on today →';
   }
+  if (todayKey) { const t = document.querySelector('#dayTabs [data-day="' + todayKey + '"]'); if (t) t.classList.add('today'); }
+  /* next up: during the trip, the first page shows the next stop for today (test with ?today=2027-07-24&now=13:00) */
+  if (todayKey) {
+    const qs = new URLSearchParams(location.search);
+    const nowMin = (() => { const q = qs.get('now'); if (q) { const [h, m] = q.split(':').map(Number); return h * 60 + (m || 0); }
+      const t = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', hour12: false }).formatToParts(new Date());
+      return (+t.find(x => x.type === 'hour').value % 24) * 60 + +t.find(x => x.type === 'minute').value; })();
+    const at = w => { const m = String(w || '').match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i); if (!m) return null; let h = +m[1] % 12; if (/pm/i.test(m[3])) h += 12; return h * 60 + (+m[2] || 0); };
+    const today = pages.map((p, i) => ({ p, i, t: at(p.when) })).filter(x => x.p.day === todayKey);
+    const nxt = today.find(x => x.t != null && x.t >= nowMin - 30) || null;
+    const el = document.createElement('button'); el.type = 'button'; el.className = 'nextup';
+    el.innerHTML = nxt ? '<div><i>NEXT UP</i><b>' + esc(nxt.p.what) + '</b><span>' + esc(nxt.p.when) + '</span></div><span class="arr">&rarr;</span>'
+                       : '<div><i>TODAY</i><b>' + (today.length ? 'That’s a wrap for today' : 'Free time') + '</b><span>' + (today.length ? 'Swipe back through today’s stops' : 'Enjoy the house') + '</span></div>';
+    el.addEventListener('click', () => go(nxt ? nxt.i : (today[0] ? today[0].i : 0)));
+    track.children[0].appendChild(el);
+  }
   if (startAt > 0) { track.style.scrollBehavior = 'auto'; track.scrollLeft = startAt * track.clientWidth; track.style.scrollBehavior = ''; }
-  update();
+  update(); motion();
+
+  /* who's coming wall: names from the trackers form ("Crew" rows); RSVP "I'm in" adds you; photos via Cloudinary when set up */
+  (function () {
+    const T = C.trackers || {}, CL = C.cloudinary || {};
+    const canPost = !!(T.action && T.entries && T.entries.tracker), canRead = !!T.csv, canPhoto = !!(CL.cloud && CL.preset);
+    const COLORS = ['#6FE0D2', '#FFC857', '#FF8A66', '#FF9FBE', '#B9A5FF', '#8FD694'];
+    const colorOf = n => COLORS[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+    let crew = new Map();
+    const parse = text => { const rows = []; let row = [], cur = '', q = false;
+      for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+        else if (c === '"') q = true; else if (c === ',') { row.push(cur); cur = ''; } else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; } else cur += c; }
+      if (cur !== '' || row.length) { row.push(cur); rows.push(row); } return rows; };
+    function render() {
+      const row = $('crewRow'); if (!row) return;
+      const list = [...crew.values()].filter(m => !/^out/i.test(m.status || ''));
+      row.innerHTML = list.map(m => '<div class="mate"><div class="av" style="--c:' + colorOf(m.name) + (m.photo ? ';background-image:url(' + esc(m.photo) + ')' : '') + '">' + (m.photo ? '' : esc(m.name.slice(0, 1).toUpperCase())) + '</div><small>' + esc(m.name) + '</small></div>').join('') +
+        '<button type="button" class="mate add" id="crewAdd" aria-label="Add yourself to the crew wall"><div class="av">+</div><small>' + (list.length ? 'Add me' : 'Be first') + '</small></button>';
+    }
+    function load() {
+      if (!canRead) { render(); return; }
+      fetch(T.csv + (T.csv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
+        const rows = parse(t); if (!rows.length) return;
+        const head = rows[0].map(h => h.trim().toLowerCase()); const col = k => head.findIndex(h => h === k || h.startsWith(k));
+        const ci = { t: col('tracker'), n: col('name'), p: col('photo'), s: col('status') };
+        const m = new Map();
+        rows.slice(1).forEach(r => { if (!/^crew/i.test((r[ci.t] || '').trim())) return; const n = (r[ci.n] || '').trim(); if (!n) return;
+          const prev = m.get(n.toLowerCase()) || {}; m.set(n.toLowerCase(), { name: n, photo: (r[ci.p] || '').trim() || prev.photo || '', status: (r[ci.s] || '').trim() }); });
+        crew = m; render();
+      }).catch(render);
+    }
+    function post(fields) {
+      const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => { const e = T.entries[k]; if (e && v) fd.append(e, v); });
+      return fetch(T.action, { method: 'POST', mode: 'no-cors', body: fd });
+    }
+    window.cousinsCrewAdd = (name, status) => { if (!canPost || !name) return; post({ tracker: 'Crew', name, status }).then(() => { const k = name.toLowerCase(); crew.set(k, Object.assign({}, crew.get(k) || {}, { name, status })); render(); }); };
+    // shrink the photo on the phone before uploading
+    const shrink = file => new Promise((res, rej) => { const img = new Image(); img.onload = () => { const m = 640, k = Math.min(1, m / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(b => b ? res(b) : rej(new Error('photo')), 'image/jpeg', .85); URL.revokeObjectURL(img.src); }; img.onerror = rej; img.src = URL.createObjectURL(file); });
+    let picked = null, back;
+    const sheet = $('crewSheet');
+    function open() { back = document.activeElement; sheet.hidden = false; $('crewPhotoWrap').hidden = !canPhoto; $('crewSoon').hidden = canPhoto; $('crewNote').textContent = '';
+      const saved = store.get('cousins-name'); if (saved && !$('crewName').value) $('crewName').value = saved; setTimeout(() => $('crewName').focus(), 30); }
+    function close() { sheet.hidden = true; back && back.focus && back.focus(); }
+    $('crewBtn').addEventListener('click', open);
+    document.addEventListener('click', e => { if (e.target.closest('#crewAdd')) open(); });
+    $('crewClose').addEventListener('click', close);
+    sheet.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') close(); });
+    sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+    $('crewFile').addEventListener('change', () => { const f = $('crewFile').files[0]; if (!f) return; picked = f;
+      $('crewPrev').style.backgroundImage = 'url(' + URL.createObjectURL(f) + ')'; $('crewPrev').textContent = ''; $('crewPickTxt').textContent = 'Looking good. Tap to change it.'; });
+    $('crewForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = $('crewName').value.trim();
+      if (!name) { $('crewNote').textContent = 'Add your first name.'; $('crewName').focus(); return; }
+      if (!canPost) { pop({ kind: 'dup', title: 'Almost ready', msg: 'The crew wall isn’t connected yet.' }); return; }
+      $('crewGo').disabled = true; $('crewNote').textContent = picked ? 'Uploading your photo…' : 'Adding you…';
+      try {
+        let photo = '';
+        if (picked && canPhoto) {
+          const fd = new FormData(); fd.append('file', await shrink(picked)); fd.append('upload_preset', CL.preset); fd.append('folder', 'cousins-crew');
+          const j = await fetch('https://api.cloudinary.com/v1_1/' + encodeURIComponent(CL.cloud) + '/image/upload', { method: 'POST', body: fd }).then(r => r.json());
+          if (!j.secure_url) throw new Error((j.error && j.error.message) || 'upload');
+          photo = j.secure_url.replace('/upload/', '/upload/c_fill,g_face,w_200,h_200,q_auto,f_auto/');
+        }
+        await post({ tracker: 'Crew', name, photo, status: 'in' });
+        store.set('cousins-name', name);
+        const k = name.toLowerCase(); crew.set(k, { name, photo: photo || (crew.get(k) || {}).photo || '', status: 'in' }); render();
+        close(); picked = null; $('crewFile').value = ''; $('crewPrev').style.backgroundImage = ''; $('crewPrev').textContent = '+'; $('crewPickTxt').textContent = 'Add a photo (optional)';
+        pop({ kind: 'ok', title: 'You’re on the wall', msg: 'Thanks, ' + name + '! Everyone will see you on the countdown page.' });
+      } catch (err) { $('crewNote').textContent = 'That didn’t go through. Check your connection and try again.'; }
+      finally { $('crewGo').disabled = false; }
+    });
+    load();
+  })();
 
   /* passcode gate: keeps casual visitors out, not real security */
   const hash = s => { let h = 2166136261 >>> 0; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
