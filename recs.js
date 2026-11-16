@@ -38,7 +38,7 @@ window.TRIP_RECS = [
     ]
   },
   {
-    id: 'games', tab: 'Game night', title: 'Game night', icon: '\u{1F3B2}', hero: 'img/game-night.jpg',
+    id: 'games', tab: 'Game night', title: 'Game night', icon: '\u{1F3B2}',
     lead: 'For a night in at the house.',
     items: [
       { title: 'Family Feud, family edition', text: 'Our own questions about us.' },
