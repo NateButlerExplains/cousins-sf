@@ -49,6 +49,9 @@
   const dayIdx = d => DAYORDER.indexOf(normDay(d));
   const absMin = (d, t) => dayIdx(d) * 1440 + t;
   const flightUrl = f => 'https://www.flightaware.com/live/flight/' + encodeURIComponent(String(f).replace(/\s+/g, '').toUpperCase());
+  const AIRLINES = [['UA', 'United'], ['AA', 'American'], ['DL', 'Delta'], ['WN', 'Southwest'], ['AS', 'Alaska'], ['B6', 'JetBlue'], ['NK', 'Spirit'],
+                    ['F9', 'Frontier'], ['G4', 'Allegiant'], ['SY', 'Sun Country'], ['MX', 'Breeze'], ['HA', 'Hawaiian'], ['AC', 'Air Canada']];
+  const airlineOf = f => { const m = String(f || '').trim().toUpperCase().match(/^([A-Z0-9]{2})\s*\d/); const a = m && AIRLINES.find(x => x[0] === m[1]); return a ? a[1] : ''; };
   const flightLink = f => f ? '<a href="' + flightUrl(f) + '" target="_blank" rel="noopener">' + esc(f.toUpperCase()) + '</a>' : '—';
 
   function parseCSV(text) {
@@ -74,8 +77,8 @@
     rows.slice(1).forEach(r => {
       const o = {}; head.forEach((k, i) => { if (k) o[k] = (r[i] || '').trim(); });
       o.arrDate = normDay(o.arrDate); o.depDate = normDay(o.depDate);
-      o.arrAirport = (o.arrAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || o.arrAirport;
-      o.depAirport = (o.depAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || o.depAirport;
+      o.arrAirport = (o.arrAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || 'SFO';
+      o.depAirport = (o.depAirport || '').toUpperCase().match(/SFO|OAK|SJC/)?.[0] || 'SFO';
       if (o.name) latest.set(o.name.trim().toLowerCase(), o);
     });
     return [...latest.values()];
@@ -88,7 +91,7 @@
       const ap = (isArr ? f.arrAirport : (f.depAirport || f.arrAirport) || '').toUpperCase();
       const d = isArr ? f.arrDate : f.depDate, t = mins(isArr ? f.arrTime : f.depTime);
       return { f, ap, d, t, abs: (dayIdx(d) >= 0 && t != null) ? absMin(d, t) : null };
-    }).filter(x => x.abs != null && AIRPORTS[x.ap]).sort((a, b) => a.abs - b.abs);
+    }).filter(x => x.abs != null && x.ap === 'SFO').sort((a, b) => a.abs - b.abs);
     const out = [];
     items.forEach(x => {
       const g = out.find(g => g.ap === x.ap && g.d === x.d && x.abs - g.first <= GROUP_MIN);
@@ -165,8 +168,7 @@
       L.control.zoom({ position: 'bottomright' }).addTo(map);
     }
     layers.forEach(l => map.removeLayer(l)); layers = []; vans = [];
-    const used = [...new Set(data.map(f => (f.arrAirport || '').toUpperCase()).filter(a => AIRPORTS[a]))];
-    if (!used.length) used.push('SFO', 'OAK');
+    const used = ['SFO'];   // the plan is SFO to our place
     const home = L.marker(HOME, { icon: L.divIcon({ className: '', html: '<div class="fart house">' + HOUSE_ART + '<b>Our place</b></div>', iconSize: [48, 72], iconAnchor: [24, 50] }), title: 'Our place', zIndexOffset: 500 }).addTo(map);
     layers.push(home);
     const bounds = [HOME];
@@ -227,21 +229,43 @@
       (all ? '' : '<div class="outside"><i>Outside the window</i>' + outside.map(o => '<span>' + esc(o) + '</span>').join('') + '</div>') +
       '<span class="still">Still booking? Aim to land at ' + best.ap + ' between ' + clock(from) + ' and ' + clock(Math.max(to, from + 60)) + ' on ' + esc(best.d) + '.</span></div>';
   }
+  // The plan: shows the ride options being considered (no prices) until one is marked Booked on the shuttle tracker, then shows the booked ride
+  let quotes = [];
   function gettingThere() {
-    return '<div class="getthere">' +
-      '<div class="gopt best"><i>The plan</i><b>One private shuttle</b><span>Direct from SFO to the house. Flight tracking, luggage room, no juggling Ubers.</span></div>' +
-      '<div class="gopt"><i>Backup</i><b>Two large vans</b><span>Split into two vehicles. Easier on luggage, and pickups can still line up.</span></div>' +
-      '<div class="gopt"><i>Budget</i><b>AirTrain + BART</b><span>Free AirTrain to the SFO BART station, about 12 minutes to Daly City, then a short ride to the house.</span></div>' +
-      '</div>';
+    const key = t => String(t || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const m = new Map(); quotes.forEach(q => { if (q.title) m.set(key(q.title), q); });
+    const all = [...m.values()].filter(q => !/^pass/i.test(q.status || ''));
+    const booked = all.find(q => /^booked/i.test(q.status || ''));
+    if (booked) return '<div class="getthere"><div class="gopt best"><i>Booked ✓</i><b>' + esc(booked.vehicle || booked.title) + '</b><span>' +
+      esc(booked.title.split(' – ')[0]) + (booked.seats && /^\d+$/.test(booked.seats) ? ' · ' + esc(booked.seats) + ' seats' : '') +
+      '. Pickup at SFO arrivals and back to SFO on Sunday. Pickup times follow the shuttle window below.</span></div></div>';
+    const ideas = [...new Set(all.map(q => (q.vehicle || '').split(',')[0].replace(/\s*\(\d+\)/g, '').trim()).filter(Boolean))];
+    return '<div class="getthere"><div class="gopt best"><i>The plan</i><b>One ride from SFO to our place</b><span>A private ride for the whole crew, straight from SFO arrivals to the house in Daly City (about 20 minutes), and back to SFO on Sunday.</span>' +
+      (ideas.length ? '<div class="ideas"><em>Options we’re looking at</em>' + ideas.map(v => '<span>' + esc(v) + '</span>').join('') + '</div>' : '') +
+      '<span class="soon">Final ride details show up here once it’s booked.</span></div></div>';
+  }
+  function loadQuotes() {
+    const T = C.trackers || {};
+    quotes = (T.adminQuotes || []).slice();
+    const done = () => { const el = document.getElementById('fPlan'); if (el) el.innerHTML = gettingThere(); };
+    done();
+    if (!T.csv) return;
+    fetch(T.csv + (T.csv.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text()).then(t => {
+      const rows = parseCSV(t); if (!rows.length) return;
+      const head = rows[0].map(h => h.trim().toLowerCase()); const col = k => head.findIndex(h => h.startsWith(k));
+      const ci = { tr: col('tracker'), title: col('title'), vehicle: col('vehicle'), seats: col('seats'), status: col('status') };
+      rows.slice(1).forEach(r => { if (/shuttle/i.test(r[ci.tr] || '')) quotes.push({ title: (r[ci.title] || '').trim(), vehicle: (r[ci.vehicle] || '').trim(), seats: (r[ci.seats] || '').trim(), status: (r[ci.status] || '').trim() }); });
+      done();
+    }).catch(() => {});
   }
   function board(list, kind) {
     const isArr = kind === 'arr';
     const rows = list.map(f => ({ f, d: isArr ? f.arrDate : f.depDate, t: mins(isArr ? f.arrTime : f.depTime), ap: ((isArr ? f.arrAirport : (f.depAirport || f.arrAirport)) || '').toUpperCase(), fl: isArr ? f.arrFlight : f.depFlight }))
       .filter(r => r.d && r.t != null).sort((a, b) => absMin(a.d, a.t) - absMin(b.d, b.t));
     if (!rows.length) return '<div class="empty">Nothing here yet.</div>';
-    return '<div class="brow hd"><span>TIME</span><span>COUSIN</span><span>FLIGHT</span><span class="ap">AIRPORT</span></div>' +
+    return '<div class="brow hd"><span>TIME</span><span>COUSIN</span><span>FLIGHT</span><span class="ap">AIRLINE</span></div>' +
       rows.map(r => '<div class="brow"><span class="tm">' + clock(r.t).replace(' ', '') + '<span class="dy">' + esc(r.d.replace(/ Jul /, ' ')) + '</span></span><span>' + esc(r.f.name) +
-        '</span><span>' + flightLink(r.fl) + '</span><span class="ap">' + esc(r.ap) + '</span></div>').join('');
+        '</span><span>' + flightLink(r.fl) + '</span><span class="ap">' + esc(airlineOf(r.fl) || (r.ap !== 'SFO' ? r.ap : '\u2014')) + '</span></div>').join('');
   }
 
   function render() {
@@ -264,6 +288,7 @@
 
   /* ---------- build the sheet ---------- */
   const opt = list => list.map(v => '<option>' + v + '</option>').join('');
+  const airlineOpts = '<option value="">Pick one</option>' + AIRLINES.map(([c, n]) => '<option value="' + c + '">' + n + '</option>').join('') + '<option value="other">Other</option>';
   const btn = document.getElementById('flyBtn');
 
   const sheet = document.createElement('section');
@@ -276,7 +301,7 @@
     '<div class="fsample" id="fSample">Sample flights · real ones show up once the form is connected</div>' +
     '<div class="fmap" id="fmap" role="region" aria-label="Map: airports, the Sprinter van route and our place"></div>' +
     '<div class="fmapnote">The house icon marks the general Daly City area. We’ll share the address closer to the trip.</div>' +
-    '<div class="fsec"><h3>Getting from SFO</h3><p class="lead">The house is in Daly City, about 9 miles from SFO.</p>' + gettingThere() + '</div>' +
+    '<div class="fsec"><h3>SFO to our place</h3><p class="lead">The house is in Daly City, about 9 miles from SFO.</p><div id="fPlan"></div></div>' +
     '<div class="fsec"><div id="fSweet"></div></div>' +
     '<div class="fsec"><h3>Airport pickups</h3><p class="lead">Arrivals within 90 minutes at the same airport share one van run. We wait for the last flight, plus about 30 minutes for bags.</p><div class="runs" id="fRuns"></div></div>' +
     '<div class="fsec"><h3>Arrivals board</h3><p class="lead">Tap a flight number for live status on trip day.</p><div class="board" id="fArr"></div></div>' +
@@ -285,16 +310,16 @@
     '<div class="fsec"><h3>Add my flight</h3><p class="lead">Changed plans? Send it again with the same first name and the board updates.</p>' +
       '<form class="fform" id="fForm" novalidate>' +
         '<label>First name<input class="ffield" name="name" autocomplete="given-name" required></label>' +
-        '<div class="grp">Landing in SF</div>' +
-        '<div class="fgrid"><label>Airport<select class="ffield" name="arrAirport">' + opt(['SFO', 'OAK', 'SJC']) + '</select></label>' +
+        '<div class="grp">Landing at SFO</div>' +
+        '<div class="fgrid"><label>Airline<select class="ffield" name="arrAirline">' + airlineOpts + '</select></label>' +
         '<label>Day<select class="ffield" name="arrDate">' + opt(['Thu Jul 22', 'Wed Jul 21', 'Fri Jul 23']) + '</select></label>' +
         '<label>Lands at<input class="ffield" name="arrTime" type="time" required></label>' +
-        '<label>Flight #<input class="ffield" name="arrFlight" placeholder="UA 1525" autocapitalize="characters"></label></div>' +
-        '<div class="grp">Flying home</div>' +
-        '<div class="fgrid"><label>Airport<select class="ffield" name="depAirport">' + opt(['SFO', 'OAK', 'SJC']) + '</select></label>' +
+        '<label>Flight #<input class="ffield" name="arrFlight" placeholder="1525" inputmode="text" autocapitalize="characters"></label></div>' +
+        '<div class="grp">Flying home from SFO</div>' +
+        '<div class="fgrid"><label>Airline<select class="ffield" name="depAirline">' + airlineOpts + '</select></label>' +
         '<label>Day<select class="ffield" name="depDate">' + opt(['Sun Jul 25', 'Sat Jul 24', 'Mon Jul 26']) + '</select></label>' +
         '<label>Takes off<input class="ffield" name="depTime" type="time"></label>' +
-        '<label>Flight #<input class="ffield" name="depFlight" placeholder="UA 2290" autocapitalize="characters"></label></div>' +
+        '<label>Flight #<input class="ffield" name="depFlight" placeholder="2290" inputmode="text" autocapitalize="characters"></label></div>' +
         '<button class="fbtn" type="submit">Add my flight</button>' +
         '<div class="fnote" id="fNote" aria-live="polite"></div>' +
       '</form></div>' +
@@ -330,6 +355,9 @@
     const pop = window.cousinsPop || (o => { note.textContent = o.title + '. ' + (o.msg || ''); });
     const name = f.name.trim(), key = name.toLowerCase();
     let sent = {}; try { sent = JSON.parse(localStorage.getItem('cousins-flight-names') || '{}'); } catch (x) {}
+    f.arrAirport = 'SFO'; f.depAirport = 'SFO';
+    const withCode = (code, num) => { num = String(num || '').trim().toUpperCase(); if (!num) return ''; if (!code || code === 'other' || /^[A-Z0-9]{2}\s*\d/.test(num) && /[A-Z]/.test(num.slice(0, 2))) return num; return code + ' ' + num.replace(/^\D+/, ''); };
+    f.arrFlight = withCode(f.arrAirline, f.arrFlight); f.depFlight = withCode(f.depAirline, f.depFlight);
     const send = () => {
       const fd = new FormData();
       Object.entries(F.entries).forEach(([k, entry]) => { if (entry && f[k] != null && f[k] !== '') fd.append(entry, k.endsWith('Time') ? clock(mins(f[k])) : (k.endsWith('Flight') ? f[k].toUpperCase() : f[k].trim())); });
@@ -349,6 +377,6 @@
     send();
   });
 
-  load();
+  load(); loadQuotes();
   if (location.hash === '#flights') open();
 })();

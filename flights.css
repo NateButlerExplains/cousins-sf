@@ -112,3 +112,9 @@
 .fart.house { width: 48px; }
 .fart b { font-size: 14px; padding: 3px 7px 2px; }
 .fmap { height: 320px; }
+
+.gopt .ideas { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.gopt .ideas em { flex-basis: 100%; font: 700 11px/1 DM; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.gopt .ideas span { padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); font: 700 12px/1.2 DM; color: #fff; }
+.gopt .soon { display: block; margin-top: 10px; font: 600 13px/1.4 DM; color: var(--gold); }
+.brow { grid-template-columns: 74px 1fr 74px 84px; }

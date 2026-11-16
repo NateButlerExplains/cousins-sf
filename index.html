@@ -190,7 +190,10 @@
   /* music playing: small pulsing bars, tap to stop */
   .nowplaying { position: fixed; left: 14px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 6; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,200,87,.6);
                 background: rgba(18,11,39,.7); display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 10px; cursor: pointer; }
-  .nowplaying[hidden] { display: none; }
+  .nowplaying svg { width: 18px; height: 18px; color: var(--gold); margin-bottom: -4px; }
+  .nowplaying i { display: none; }
+  .nowplaying.on svg { display: none; }
+  .nowplaying.on i { display: block; }
   .nowplaying i { width: 3px; height: 14px; border-radius: 2px; background: var(--gold); transform-origin: bottom; animation: eq 1s ease-in-out infinite; }
   .nowplaying i:nth-child(2) { animation-delay: -.35s; } .nowplaying i:nth-child(3) { animation-delay: -.7s; }
   @keyframes eq { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
@@ -340,10 +343,9 @@
   <button type="button" class="mitem" id="mapBtn"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>The map</button>
   <button type="button" class="mitem" id="flyBtn" aria-haspopup="dialog" aria-controls="fsheet"><span class="mic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>Flights &amp; vans</button>
   <button type="button" class="mitem" id="crewBtn" aria-haspopup="dialog" aria-controls="crewSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.6a5 5 0 0 1 6 4.9"/></svg></span>Add me to the crew</button>
-  <button type="button" class="mitem" id="musicBtn" aria-pressed="false"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span id="musicLabel">Play music</span></button>
   <button type="button" class="mitem dim" id="adminBtn" aria-haspopup="dialog" aria-controls="adminSheet"><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>Admin</button>
 </div>
-<button class="nowplaying" id="nowPlaying" type="button" aria-label="Music is playing. Tap to stop." hidden><i></i><i></i><i></i></button>
+<button class="nowplaying" id="musicBtn" type="button" aria-label="Play music" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><i></i><i></i><i></i></button>
 <section class="crewsheet" id="crewSheet" role="dialog" aria-modal="true" aria-labelledby="crewTitle" hidden>
   <form class="crewcard" id="crewForm" novalidate>
     <div class="crewhead"><b id="crewTitle">Join the crew wall</b><button type="button" class="mx2" id="crewClose" aria-label="Close">&#10005;</button></div>
@@ -648,13 +650,12 @@
 
   /* music: play/stop from the menu; a small pulsing note shows while it plays (tap it to stop) */
   const music = $('music'), mb = $('musicBtn');
-  function setOn(on) { mb.classList.toggle('on', on); mb.setAttribute('aria-pressed', on); $('musicLabel').textContent = on ? 'Stop music' : 'Play music'; $('nowPlaying').hidden = !on; }
+  function setOn(on) { mb.classList.toggle('on', on); mb.setAttribute('aria-pressed', on); mb.setAttribute('aria-label', on ? 'Stop music' : 'Play music'); }
   function toggleMusic() {
     if (music.paused) { music.volume = .55; music.play().then(() => setOn(true)).catch(() => { setOn(false); toast('Tap Play music again.'); }); }
     else { music.pause(); setOn(false); }
   }
   mb.addEventListener('click', toggleMusic);
-  $('nowPlaying').addEventListener('click', () => { music.pause(); setOn(false); });
   music.addEventListener('pause', () => setOn(false));
   document.addEventListener('visibilitychange', () => { if (document.hidden && !music.paused) music.pause(); });
 

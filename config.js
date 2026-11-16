@@ -25,6 +25,17 @@ window.TRIP_CONFIG = {
                baths: 'entry.1100148429', sleeps: 'entry.567865242', area: 'entry.1855486817', vehicle: 'entry.1741191533', seats: 'entry.422836596',
                luggage: 'entry.1933466509', tracking: 'entry.1220163658', fees: 'entry.758034803', status: 'entry.257300097', notes: 'entry.1600394314' },
     csv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9-RNj8b4nTa6JVflze5_I-SSF6Cjizc55vzj_-FqaAsmcZsaSDUNjb4SZBi2q02bAZ2uAY3yvfh6P/pub?gid=1511093900&single=true&output=csv'
+,
+    // Shuttle quotes entered by the admin (from the napkin notes). Set status: 'Booked' on the chosen one and the Flights screen shows it.
+    adminQuotes: [
+
+      { tracker: 'Shuttle quote', title: 'Allied Limos – Executive bus', vehicle: 'Executive bus, one vehicle for everyone', seats: 'Whole crew', total: '$215/hr · 4-hr minimum',
+        luggage: 'Everyone plus carry-ons', tracking: '', fees: 'No', status: 'Quoted', notes: 'Round trip transportation. Tip and tax extra. Contact: Vicky. Quoted for July 22–25, 2027.' },
+      { tracker: 'Shuttle quote', title: 'Allied Limos – Sprinter + car', vehicle: 'Executive Sprinter van (14) + 1 car (3)', seats: '17', total: '$180 Sprinter (1 hr) + $105 car',
+        luggage: '', tracking: '', fees: 'No', status: 'Quoted', notes: 'Sprinter holds 14 and is $180 for one hour. The car holds 3 and is $105. Ask whether the car’s $105 is per hour or per trip. Tip and tax extra. Contact: Vicky.' },
+      { tracker: 'Shuttle quote', title: 'Allied Limos – 2 SUVs + sedan', vehicle: '2 SUVs + 1 sedan', seats: '', total: '$535 total',
+        luggage: '', tracking: '', fees: 'No', status: 'Quoted', notes: '2 SUVs at $195 each + 1 sedan at $145. Ask whether $535 is one way or round trip. Contact: Vicky.' }
+    ]
   },
   // Crew wall photos: Cloudinary cloud name + an UNSIGNED upload preset (never the API secret)
   cloudinary: { cloud: 'ezljgye8', preset: 'cousins_crew' },
